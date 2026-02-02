@@ -1,0 +1,691 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Background Colors - Dark Minimalism */
+    --bg-primary: #0A0A0A;
+    --bg-secondary: #1A1A1A;
+    --bg-elevated: #2A2A2A;
+    
+    /* Text Colors */
+    --text-primary: #FFFFFF;
+    --text-secondary: #B0B0B0;
+    --text-muted: #6B6B6B;
+    
+    /* Accent Color - Electric Cyan (use sparingly) */
+    --accent: #00F0FF;
+    --accent-glow: rgba(0, 240, 255, 0.3);
+    --accent-subtle: rgba(0, 240, 255, 0.1);
+    
+    /* Spacing */
+    --section-padding: 8rem;
+    --content-max-width: 1400px;
+    
+    /* Animation - Minimal & Professional */
+    --ease-premium: cubic-bezier(0.4, 0.0, 0.2, 1);
+  }
+
+  body {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: var(--font-geist-sans);
+  }
+
+  /* Professional Typography */
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    font-family: var(--font-geist-sans);
+  }
+
+  /* Mono font for prices only */
+  .price {
+    font-family: var(--font-geist-mono);
+  }
+}
+
+/* Keyframe animations from the original HTML */
+@keyframes float {
+  0%, 100% { 
+    transform: translateY(0px) translateX(0px) scale(1);
+  }
+  33% { 
+    transform: translateY(-30px) translateX(20px) scale(1.1);
+  }
+  66% { 
+    transform: translateY(20px) translateX(-15px) scale(0.9);
+  }
+}
+
+@keyframes fadeUpStagger {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes glowPulse {
+  0%, 100% {
+    box-shadow: 0 0 20px var(--accent-glow);
+  }
+  50% {
+    box-shadow: 0 0 40px var(--accent-glow), 0 0 60px var(--accent-glow);
+  }
+}
+
+@keyframes typing {
+  0%, 60% { opacity: 1; }
+  30% { opacity: 0.4; }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Cart Animations */
+@keyframes slideInRightCart {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOutUp {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-5deg); }
+  75% { transform: rotate(5deg); }
+}
+
+@keyframes pulseSubtle {
+  0%, 100% { 
+    transform: scale(1); 
+    box-shadow: 0 0 0 0 rgba(0, 240, 255, 0.4);
+  }
+  50% { 
+    transform: scale(1.05); 
+    box-shadow: 0 0 0 10px rgba(0, 240, 255, 0);
+  }
+}
+
+/* Utility classes */
+@layer utilities {
+  .animate-float {
+    animation: float 8s ease-in-out infinite;
+  }
+  
+  .animate-fade-up {
+    animation: fadeUpStagger 0.8s var(--ease-premium) forwards;
+  }
+  
+  .animate-glow {
+    animation: glowPulse 3s ease-in-out infinite;
+  }
+
+  .animate-typing {
+    animation: typing 1.5s infinite;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+  }
+
+  /* Cart specific animations */
+  .animate-slide-in-right {
+    animation: slideInRightCart 0.3s ease-out;
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.2s ease-out;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.3s ease-out;
+  }
+
+  .animate-fade-out-up {
+    animation: fadeOutUp 0.3s ease-out forwards;
+  }
+
+  .animate-bounce {
+    animation: bounce 0.6s ease-out;
+  }
+
+  .animate-wiggle {
+    animation: wiggle 0.3s ease-out;
+  }
+
+  .animate-pulse-subtle {
+    animation: pulseSubtle 2s infinite;
+  }
+}
+
+/* MINIMAL ANIMATIONS - Only These Allowed */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from { 
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleHover {
+  from { transform: scale(1); }
+  to { transform: scale(1.02); }
+}
+
+@keyframes glowBorder {
+  from { border-color: var(--bg-elevated); }
+  to { border-color: var(--accent); }
+}
+
+@keyframes pulseOnce {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+@keyframes typing {
+  0%, 60%, 100% { opacity: 0.3; }
+  30% { opacity: 1; }
+}
+
+/* Professional Animation Classes */
+.animate-fade-in {
+  animation: fadeIn 500ms var(--ease-premium);
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 300ms var(--ease-premium);
+}
+
+.animate-scale-hover:hover {
+  animation: scaleHover 200ms var(--ease-premium) forwards;
+}
+
+.animate-glow-border:focus {
+  animation: glowBorder 200ms var(--ease-premium) forwards;
+}
+
+.animate-pulse-once {
+  animation: pulseOnce 400ms var(--ease-premium);
+}
+
+.animate-typing {
+  animation: typing 1.5s infinite;
+}
+
+/* Drag and Drop States */
+.dragging {
+  opacity: 0.7;
+  transform: scale(0.98);
+  transition: all 300ms var(--ease-premium);
+}
+
+.drop-zone-active {
+  border-color: var(--accent);
+  box-shadow: 0 0 20px var(--accent-glow);
+  transition: all 300ms var(--ease-premium);
+}
+
+/* Professional Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bg-elevated);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* Focus States for Accessibility */
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Professional Button Styles */
+.btn-primary {
+  background: var(--accent);
+  color: #0A0A0A;
+  font-weight: 600;
+  transition: all 200ms var(--ease-premium);
+}
+
+.btn-primary:hover {
+  background: #00D4E6;
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  border: 1px solid var(--bg-elevated);
+  transition: all 200ms var(--ease-premium);
+}
+
+.btn-secondary:hover {
+  border-color: var(--accent);
+  background: var(--bg-secondary);
+}
+
+/* Professional Form Styles */
+.form-input {
+  background: var(--bg-elevated);
+  border: 1px solid var(--bg-elevated);
+  color: var(--text-primary);
+  transition: all 200ms var(--ease-premium);
+}
+
+.form-input:focus {
+  border-color: var(--accent);
+  background: var(--bg-secondary);
+}
+
+.form-input::placeholder {
+  color: var(--text-muted);
+}
+
+/* Professional Card Styles */
+.card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--bg-elevated);
+  transition: all 300ms var(--ease-premium);
+}
+
+.card:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+
+/* Loading States */
+.skeleton {
+  background: linear-gradient(90deg, var(--bg-elevated) 25%, var(--bg-secondary) 50%, var(--bg-elevated) 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Professional Modal Backdrop */
+.modal-backdrop {
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+}
+
+/* Remove old animations that don't fit the professional theme */
+@keyframes float {
+  0%, 100% { 
+    transform: translateY(0px) translateX(0px) scale(1);
+  }
+  33% { 
+    transform: translateY(-30px) translateX(20px) scale(1.1);
+  }
+  66% { 
+    transform: translateY(20px) translateX(-15px) scale(0.9);
+  }
+}
+
+@keyframes fadeUpStagger {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes glowPulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(0, 240, 255, 0.6);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes bounce {
+  0%, 20%, 53%, 80%, 100% {
+    transform: translate3d(0, 0, 0);
+  }
+  40%, 43% {
+    transform: translate3d(0, -30px, 0);
+  }
+  70% {
+    transform: translate3d(0, -15px, 0);
+  }
+  90% {
+    transform: translate3d(0, -4px, 0);
+  }
+}
+
+@keyframes wiggle {
+  0%, 7% {
+    transform: rotateZ(0);
+  }
+  15% {
+    transform: rotateZ(-15deg);
+  }
+  20% {
+    transform: rotateZ(10deg);
+  }
+  25% {
+    transform: rotateZ(-10deg);
+  }
+  30% {
+    transform: rotateZ(6deg);
+  }
+  35% {
+    transform: rotateZ(-4deg);
+  }
+  40%, 100% {
+    transform: rotateZ(0);
+  }
+}
+
+@keyframes pulseSubtle {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Utility classes for the old animations (keeping for backward compatibility) */
+.animate-float {
+  animation: float 8s ease-in-out infinite;
+}
+
+.animate-fade-up-stagger {
+  animation: fadeUpStagger 0.8s ease-out forwards;
+}
+
+.animate-glow-pulse {
+  animation: glowPulse 3s ease-in-out infinite;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.3s ease-out;
+}
+
+.animate-bounce {
+  animation: bounce 1s;
+}
+
+.animate-wiggle {
+  animation: wiggle 1s ease-in-out;
+}
+
+.animate-pulse-subtle {
+  animation: pulseSubtle 2s ease-in-out infinite;
+}
+
+.animate-slide-in-left {
+  animation: slideInLeft 0.3s ease-out;
+}
+/* NEW REFINED ANIMATIONS FOR CHECKOUTLY */
+
+/* Slide In Animation for Messages */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Fade In Animation */
+@keyframes fadeInSmooth {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Drop Ripple Effect */
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+/* Success Toast Animations */
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+
+/* Refined Product Card Hover */
+.product-card {
+  background: linear-gradient(135deg, #1A1A1A 0%, #0F0F0F 100%);
+  border: 1px solid #2A2A2A;
+  border-radius: 16px;
+  padding: 20px;
+  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: grab;
+  position: relative;
+  overflow: hidden;
+}
+
+.product-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #00E5FF, transparent);
+  opacity: 0;
+  transition: opacity 300ms;
+}
+
+.product-card:hover {
+  transform: translateY(-4px);
+  border-color: #00E5FF;
+  box-shadow: 0 8px 32px rgba(0, 229, 255, 0.15);
+}
+
+.product-card:hover::before {
+  opacity: 1;
+}
+
+.product-card:active {
+  cursor: grabbing;
+  transform: scale(0.98);
+}
+
+.product-card.dragging {
+  opacity: 0.5;
+  transform: scale(0.95);
+  cursor: grabbing;
+  border-color: #00E5FF;
+  box-shadow: 0 0 0 4px rgba(0, 229, 255, 0.2);
+}
+
+/* Drop Ripple Class */
+.drop-ripple {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100px;
+  height: 100px;
+  margin: -50px 0 0 -50px;
+  border: 3px solid #00E5FF;
+  border-radius: 50%;
+  animation: ripple 600ms cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+}
+
+/* Utility Classes */
+.animate-slideIn {
+  animation: slideIn 300ms ease-out;
+}
+
+.animate-slideInRight {
+  animation: slideInRight 300ms ease-out;
+}
+
+.animate-slideOutRight {
+  animation: slideOutRight 300ms ease-in forwards;
+}
+
+.animate-fade-in {
+  animation: fadeInSmooth 0.8s ease-out forwards;
+}

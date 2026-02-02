@@ -1,0 +1,6 @@
+name = "checkoutly-chat-worker"
+main = "cloudflare-worker-updated.js"
+compatibility_date = "2026-01-30"
+
+[env.production.vars]
+N8N_BASE_URL = "https://semiepically-interprotoplasmic-duane.ngrok-free.dev"
