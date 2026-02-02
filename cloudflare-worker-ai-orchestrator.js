@@ -142,15 +142,15 @@ AVAILABLE FUNCTIONS:
 
 RULES:
 - If user asks about a product → call product_lookup
-- If user wants to add/buy something → call add_to_cart
+- If user wants to add/buy something → call add_to_cart with the EXACT product name
 - If user wants to see cart → call view_cart
 
-For "Add it to my cart" → call add_to_cart with the last mentioned product name.
+IMPORTANT: When user says "I want to buy it", "add it to cart", etc., use the EXACT product name from the conversation, NOT "last mentioned product".
 
 YOU MUST CALL A FUNCTION. DO NOT return text like "Call add_to_cart". ACTUALLY CALL THE FUNCTION.`;
 
     if (lastProduct) {
-      systemPrompt += `\n\nLast mentioned product: "${lastProduct}". Use this for "add to cart" requests without specific product.`;
+      systemPrompt += `\n\nLast mentioned product: "${lastProduct}". When user says "add it", "I want it", "buy it" without specifying a product, use "${lastProduct}" as the product_name.`;
     }
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -194,7 +194,7 @@ YOU MUST CALL A FUNCTION. DO NOT return text like "Call add_to_cart". ACTUALLY C
               properties: {
                 product_name: {
                   type: 'string',
-                  description: 'Exact product name to add to cart. If user says "add it", "I want it", etc. without specifying product name, use the LAST MENTIONED PRODUCT from the conversation context.'
+                  description: 'EXACT product name to add to cart. If user says "add it", "I want it", "buy it" without specifying product name, use the EXACT name of the last mentioned product from conversation context. NEVER use placeholder text like "last mentioned product".'
                 },
                 quantity: {
                   type: 'number',

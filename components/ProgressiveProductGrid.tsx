@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, memo } from 'react'
 import ProductImage from './ProductImage'
 import { getAllProducts } from '@/lib/products'
 import type { Product } from '@/lib/types'
@@ -11,7 +11,7 @@ interface ProgressiveProductGridProps {
   className?: string
 }
 
-export default function ProgressiveProductGrid({ 
+export default memo(function ProgressiveProductGrid({ 
   onProductClick, 
   onProductDrag,
   className = '' 
@@ -24,9 +24,11 @@ export default function ProgressiveProductGrid({
   
   const PRODUCTS_PER_PAGE = 4
   const totalPages = Math.ceil(products.length / PRODUCTS_PER_PAGE)
-  const currentProducts = products.slice(
-    currentPage * PRODUCTS_PER_PAGE, 
-    (currentPage + 1) * PRODUCTS_PER_PAGE
+  const currentProducts = useMemo(() => 
+    products.slice(
+      currentPage * PRODUCTS_PER_PAGE, 
+      (currentPage + 1) * PRODUCTS_PER_PAGE
+    ), [products, currentPage, PRODUCTS_PER_PAGE]
   )
 
   useEffect(() => {
@@ -241,4 +243,4 @@ export default function ProgressiveProductGrid({
       )}
     </div>
   )
-}
+})

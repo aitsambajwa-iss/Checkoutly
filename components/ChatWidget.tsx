@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect, useCallback, useMemo, memo } from 'react'
 import { sendToCloudflareWorker } from '@/lib/n8n'
 import { showSuccessToast, showErrorToast } from '@/lib/toast'
 import { formatTime, createTimestamp, generateId } from '@/lib/time'
@@ -106,9 +106,15 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
   const [completedOrder, setCompletedOrder] = useState<any>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  // Calculate cart totals
-  const itemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0)
-  const cartTotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+  // Calculate cart totals (memoized for performance)
+  const itemCount = useMemo(() => 
+    cartItems.reduce((sum, item) => sum + item.quantity, 0), 
+    [cartItems]
+  )
+  const cartTotal = useMemo(() => 
+    cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0), 
+    [cartItems]
+  )
 
   // Add item to internal cart with specific options (for external calls)
   const addToCartWithOptions = useCallback(async (productName: string, options: { size: string; color: string; quantity: number }) => {
@@ -756,48 +762,12 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
         onDrop={handleDrop}
       >
         {messages.map((message) => (
-          <div
+          <MessageItem
             key={message.id}
-            className={`flex ${message.isUser ? 'justify-end' : 'justify-start'} animate-[slideIn_300ms_ease-out]`}
-          >
-            <div className={`max-w-[80%] ${message.isUser ? 'order-2' : 'order-1'}`}>
-              {!message.isUser && (
-                <div className="text-xs text-[#6B6B6B] mb-1 flex items-center gap-2">
-                  <img 
-                    src="/logo.svg" 
-                    alt="Checkoutly Logo" 
-                    width={16} 
-                    height={16}
-                    className="object-contain"
-                  />
-                  Checkoutly AI
-                </div>
-              )}
-              
-              {/* Check if this is a product card message */}
-              {message.content.startsWith('PRODUCT_CARD:') ? (
-                <InlineProductCard
-                  product={JSON.parse(message.content.replace('PRODUCT_CARD:', ''))}
-                  onAddToCart={addToCart}
-                  onViewDetails={handleProductDetails}
-                />
-              ) : (
-                <div
-                  className={`px-4 py-3 rounded-2xl ${
-                    message.isUser
-                      ? 'bg-[#00E5FF] text-black'
-                      : 'bg-[#1A1A1A] text-white border border-[#2A2A2A]'
-                  }`}
-                >
-                  {message.content}
-                </div>
-              )}
-              
-              <div className="text-xs text-[#6B6B6B] mt-1">
-                {formatTime(message.timestamp)}
-              </div>
-            </div>
-          </div>
+            message={message}
+            addToCart={addToCart}
+            handleProductDetails={handleProductDetails}
+          />
         ))}
 
         {/* Drop indicator overlay */}
@@ -920,3 +890,55 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
     </div>
   )
 }
+
+// Memoized message component for better performance
+const MessageItem = memo(function MessageItem({ message, addToCart, handleProductDetails }: {
+  message: Message
+  addToCart: (productName: string, quantity?: number) => Promise<void>
+  handleProductDetails: (product: Product) => void
+}) {
+  return (
+    <div
+      key={message.id}
+      className={`flex ${message.isUser ? 'justify-end' : 'justify-start'} animate-[slideIn_300ms_ease-out]`}
+    >
+      <div className={`max-w-[80%] ${message.isUser ? 'order-2' : 'order-1'}`}>
+        {!message.isUser && (
+          <div className="text-xs text-[#6B6B6B] mb-1 flex items-center gap-2">
+            <img 
+              src="/logo.svg" 
+              alt="Checkoutly Logo" 
+              width={16} 
+              height={16}
+              className="object-contain"
+            />
+            Checkoutly AI
+          </div>
+        )}
+        
+        {/* Check if this is a product card message */}
+        {message.content.startsWith('PRODUCT_CARD:') ? (
+          <InlineProductCard
+            product={JSON.parse(message.content.replace('PRODUCT_CARD:', ''))}
+            onAddToCart={addToCart}
+            onViewDetails={handleProductDetails}
+          />
+        ) : (
+          <div
+            className={`px-4 py-3 rounded-2xl ${
+              message.isUser
+                ? 'bg-[#00E5FF] text-black'
+                : 'bg-[#1A1A1A] text-white border border-[#2A2A2A]'
+            }`}
+          >
+            {message.content}
+          </div>
+        )}
+        
+        <div className="text-xs text-[#6B6B6B] mt-1">
+          {formatTime(message.timestamp)}
+        </div>
+      </div>
+    </div>
+  )
+})
