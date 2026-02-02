@@ -9,12 +9,14 @@ export interface Product {
   id: string
   name: string
   price: number
+  originalPrice?: number
   icon?: string
   description?: string | null
   sizes?: string[]
   colors?: string[]
   availability?: string
   image_url?: string
+  featured?: boolean
 }
 
 export interface CartItem {

@@ -111,7 +111,7 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
   const cartTotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
 
   // Add item to internal cart with specific options (for external calls)
-  const addToCartWithOptions = async (productName: string, options: { size: string; color: string; quantity: number }) => {
+  const addToCartWithOptions = useCallback(async (productName: string, options: { size: string; color: string; quantity: number }) => {
     try {
       // Get actual product data from Supabase
       const { getAllProducts } = await import('@/lib/products')
@@ -145,7 +145,7 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
       console.error('Error adding to cart:', error)
       addMessage(`❌ Sorry, there was an error adding ${productName} to your cart.`, false)
     }
-  }
+  }, [setCartItems])
 
   // Expose the addToCartWithOptions function to parent component
   useEffect(() => {
@@ -153,7 +153,7 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
       // This is a bit of a hack, but we need to expose the function to the parent
       (window as any).chatWidgetAddToCart = addToCartWithOptions
     }
-  }, [onExternalAddToCart])
+  }, [onExternalAddToCart, addToCartWithOptions])
 
   // Add item to internal cart
   const addToCart = async (productName: string, quantity: number = 1) => {
@@ -437,7 +437,7 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
     } finally {
       hideTypingIndicator()
     }
-  }, [isTyping, messages, cartItems, completedOrder, itemCount, cartTotal, addToCart, showCart])
+  }, [isTyping, cartItems, completedOrder, addToCart, showCart])
 
   // Helper function to calculate order total
   const calculateOrderTotal = (orderData: OrderData) => {
@@ -822,7 +822,7 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
                   Drop to inquire
                 </div>
                 <div className="text-sm text-[#B0B0B0]">
-                  I'll tell you everything about this product!
+                  I&apos;ll tell you everything about this product!
                 </div>
               </div>
             </div>

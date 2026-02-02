@@ -201,7 +201,7 @@ export default function Demo() {
                     <div>
                       <div className="text-sm font-medium text-white mb-1">Try It</div>
                       <div className="text-xs text-[#B0B0B0]">
-                        Drag any product into the chat or ask questions like "Show me running shoes"
+                        Drag any product into the chat or ask questions like &quot;Show me running shoes&quot;
                       </div>
                     </div>
                   </div>

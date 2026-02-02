@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { formatTime } from '@/lib/time'
 
 interface Review {
@@ -37,11 +37,7 @@ export default function ProductReviews({ productName, className = '' }: ProductR
   const [error, setError] = useState<string | null>(null)
   const [showAll, setShowAll] = useState(false)
 
-  useEffect(() => {
-    fetchReviews()
-  }, [productName])
-
-  const fetchReviews = async () => {
+  const fetchReviews = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
@@ -61,7 +57,11 @@ export default function ProductReviews({ productName, className = '' }: ProductR
     } finally {
       setLoading(false)
     }
-  }
+  }, [productName])
+
+  useEffect(() => {
+    fetchReviews()
+  }, [fetchReviews])
 
   const renderStars = (rating: number, size: 'sm' | 'md' | 'lg' = 'md') => {
     const sizeClasses = {
