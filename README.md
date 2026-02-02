@@ -1,6 +1,6 @@
-# Checkoutly - Next.js 14 Landing Page
+# Checkoutly - AI-Powered Conversational Commerce Platform
 
-A premium, production-ready landing page for Checkoutly - an AI-powered conversational commerce platform built with Next.js 14, TypeScript, and Tailwind CSS.
+A premium, production-ready e-commerce platform built with Next.js 14, TypeScript, and Tailwind CSS. Checkoutly provides businesses with intelligent chatbots for order management, payment processing, and moderated reviews.
 
 ## Features
 
@@ -9,7 +9,10 @@ A premium, production-ready landing page for Checkoutly - an AI-powered conversa
 - 🚀 Next.js 14 with App Router
 - 📱 Fully responsive design
 - 🎭 Smooth animations and micro-interactions
-- 💬 Integrated n8n chatbot functionality
+- 💬 Integrated AI chatbot functionality
+- 🛒 Complete e-commerce solution with cart management
+- 💳 Payment processing integration
+- ⭐ Product reviews and rating system
 - 🔒 TypeScript for type safety
 - 🎯 Production-ready code structure
 
@@ -43,35 +46,44 @@ yarn dev
 ```
 checkoutly/
 ├── app/
+│   ├── api/                    # API routes for orders, payments, reviews
 │   ├── layout.tsx              # Root layout with fonts & metadata
 │   ├── page.tsx                # Main landing page
 │   └── globals.css             # Global styles & CSS variables
 ├── components/
+│   ├── cart/                   # Cart-related components
+│   ├── checkout/               # Checkout flow components
+│   ├── gestures/               # Touch gesture handlers
+│   ├── ui/                     # Reusable UI components
 │   ├── Navbar.tsx              # Fixed navigation bar
 │   ├── Hero.tsx                # Hero section with animations
-│   ├── Features.tsx            # Three feature cards
-│   ├── Demo.tsx                # Demo section container
-│   ├── ProductGrid.tsx         # Product cards component
-│   ├── ChatWidget.tsx          # Live chat widget with n8n integration
-│   ├── Footer.tsx              # Footer section
-│   ├── ScrollProgress.tsx      # Scroll progress indicator
-│   └── ui/
-│       ├── GrainOverlay.tsx    # Grain texture effect
-│       └── BackgroundOrbs.tsx  # Animated background orbs
+│   ├── Features.tsx            # Feature showcase
+│   ├── ProductGrid.tsx         # Product display components
+│   ├── ChatWidget.tsx          # AI chat integration
+│   ├── ShoppingCart.tsx        # Cart management
+│   ├── PaymentForm.tsx         # Payment processing
+│   └── ReviewForm.tsx          # Product reviews
 ├── lib/
 │   ├── utils.ts                # Utility functions
-│   ├── n8n.ts                  # n8n webhook integration
-│   └── types.ts                # TypeScript interfaces
+│   ├── products.ts             # Product data management
+│   ├── types.ts                # TypeScript interfaces
+│   └── supabase.ts             # Database integration
 └── public/                     # Static assets
 ```
 
-## n8n Integration
+## Key Components
 
-The chatbot is pre-configured to work with your n8n webhook:
-- Default URL: `https://imranmustafa-iss.app.n8n.cloud/webhook/d717cda8-d85c-4a50-bb6e-f4da4c3590eb/chat`
-- Handles streaming JSON responses
-- Fallback to demo mode if webhook unavailable
-- Session management for conversation continuity
+### E-commerce Features
+- **Product Grid**: Dynamic product display with filtering
+- **Shopping Cart**: Full cart management with persistence
+- **Checkout Flow**: Multi-step checkout with payment integration
+- **Order Management**: Complete order processing system
+- **Review System**: Customer reviews and ratings
+
+### AI Integration
+- **Chat Widget**: Intelligent customer support
+- **Order Assistant**: AI-powered order management
+- **Product Recommendations**: Smart product suggestions
 
 ## Customization
 
@@ -89,7 +101,7 @@ Update CSS custom properties in `app/globals.css`:
 - Update metadata in `app/layout.tsx`
 - Modify hero content in `components/Hero.tsx`
 - Add/remove features in `components/Features.tsx`
-- Update products in `components/ProductGrid.tsx`
+- Update products in `lib/products.ts`
 
 ## Build for Production
 
@@ -98,13 +110,21 @@ npm run build
 npm start
 ```
 
+## Deployment
+
+This project is configured for deployment on:
+- **Vercel** (recommended for Next.js)
+- **Cloudflare Pages** (with Wrangler configuration)
+- **Netlify**
+
 ## Technologies Used
 
 - **Next.js 14** - React framework with App Router
 - **TypeScript** - Type safety and better DX
 - **Tailwind CSS** - Utility-first CSS framework
-- **Framer Motion** - Animation library (ready to use)
-- **n8n Integration** - Webhook-based chatbot functionality
+- **Supabase** - Database and authentication
+- **Cloudflare Workers** - AI integration
+- **Framer Motion** - Animation library
 
 ## Performance Features
 
@@ -113,6 +133,7 @@ npm start
 - Responsive images and fonts
 - Minimal JavaScript bundle
 - SEO optimized with proper metadata
+- Progressive loading for better UX
 
 ## License
 
