@@ -3,7 +3,7 @@ import { getSessionId } from './utils'
 export async function sendToCloudflareWorker(message: string): Promise<string> {
   const WORKER_URL = process.env.NEXT_PUBLIC_CLOUDFLARE_WORKER_URL;
   const N8N_URL = process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL;
-  
+
   // If no worker URL is configured, use direct n8n as last resort
   if (!WORKER_URL || WORKER_URL.includes('your-worker') || WORKER_URL.includes('placeholder')) {
     console.log('Worker URL not configured, falling back to N8N directly');
@@ -12,7 +12,7 @@ export async function sendToCloudflareWorker(message: string): Promise<string> {
     }
     return sendToN8n(N8N_URL, message);
   }
-  
+
   const sessionId = getSessionId();
   const cleanWorkerUrl = WORKER_URL.replace(/\/+$/, '');
   const chatEndpoint = `${cleanWorkerUrl}/chat`;
@@ -24,31 +24,37 @@ export async function sendToCloudflareWorker(message: string): Promise<string> {
     // Strategy 1: Standard fetch
     { name: 'standard', options: { headers: {} } },
     // Strategy 2: Disable keepalive and force connection close
-    { name: 'no-keepalive', options: { 
-      keepalive: false,
-      headers: { 
-        'Connection': 'close',
-        'Cache-Control': 'no-cache'
-      } 
-    }},
+    {
+      name: 'no-keepalive', options: {
+        keepalive: false,
+        headers: {
+          'Connection': 'close',
+          'Cache-Control': 'no-cache'
+        }
+      }
+    },
     // Strategy 3: Try with different user agent to avoid QUIC
-    { name: 'alt-headers', options: { 
-      headers: { 
-        'User-Agent': 'Mozilla/5.0 (compatible; Checkoutly/1.0)',
-        'Accept': 'application/json',
-        'Cache-Control': 'no-store'
-      } 
-    }},
+    {
+      name: 'alt-headers', options: {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (compatible; Checkoutly/1.0)',
+          'Accept': 'application/json',
+          'Cache-Control': 'no-store'
+        }
+      }
+    },
     // Strategy 4: Minimal headers
-    { name: 'minimal', options: { 
-      headers: {} 
-    }}
+    {
+      name: 'minimal', options: {
+        headers: {}
+      }
+    }
   ];
 
   for (const strategy of strategies) {
     try {
       console.log(`Trying ${strategy.name} strategy...`);
-      
+
       const requestBody = {
         message: message,
         chatInput: message,
@@ -57,19 +63,19 @@ export async function sendToCloudflareWorker(message: string): Promise<string> {
       };
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout (increased for slow LLM responses)
 
       const baseHeaders = {
         'Content-Type': 'application/json',
         'X-Chat-ID': sessionId,
       };
-      
+
       // Filter out undefined values from strategy headers
       const strategyHeaders = strategy.options.headers || {};
       const cleanHeaders = Object.fromEntries(
         Object.entries(strategyHeaders).filter(([_, value]) => value !== undefined)
       );
-      
+
       const mergedHeaders = { ...baseHeaders, ...cleanHeaders };
 
       const fetchOptions: RequestInit = {
@@ -95,25 +101,29 @@ export async function sendToCloudflareWorker(message: string): Promise<string> {
 
       const data = await response.json();
       console.log(`${strategy.name} strategy SUCCESS:`, data);
-      
+
       if (data.error) {
         console.error(`${strategy.name} returned error:`, data.error);
         continue; // Try next strategy
       }
-      
+
       return data.response || data.message || 'No response received';
-      
+
     } catch (error) {
-      console.error(`${strategy.name} strategy failed:`, (error as Error).message);
-      
+      if ((error as Error).name === 'AbortError') {
+        console.warn(`${strategy.name} strategy timed out or aborted.`);
+      } else {
+        console.warn(`${strategy.name} strategy failed:`, (error as Error).message);
+      }
+
       // If this is the last strategy, fall back to N8N only for product questions
       if (strategy === strategies[strategies.length - 1]) {
         console.log('All Cloudflare strategies failed');
-        
+
         // Only fall back to N8N for product questions
         const productKeywords = ['product', 'available', 'have', 'sell', 'show', 'see', 'what', 'tell', 'about', 'buy', 'price', 'cost', 'shopping', 'shop', 'browse'];
         const isProductQuestion = productKeywords.some(keyword => message.toLowerCase().includes(keyword));
-        
+
         if (isProductQuestion && N8N_URL) {
           console.log('Product question detected, falling back to N8N...');
           try {
@@ -127,11 +137,11 @@ export async function sendToCloudflareWorker(message: string): Promise<string> {
           return 'Hey there! I\'m your shopping assistant. I can help you find products, check prices, and answer questions about our items. What are you looking for today?';
         }
       }
-      
+
       continue; // Try next strategy
     }
   }
-  
+
   // This shouldn't be reached, but just in case
   return 'Sorry, I\'m having trouble connecting right now. Please try again in a moment.';
 }
@@ -164,15 +174,15 @@ export async function sendToN8n(webhookUrl: string, message: string): Promise<st
 
     const responseText = await response.text()
     console.log('Raw n8n response:', responseText)
-    
+
     // Handle streaming JSON responses from n8n
     const jsonLines = responseText.trim().split('\n').filter(line => line.trim())
     let finalResponse = ''
-    
+
     for (const line of jsonLines) {
       try {
         const data = JSON.parse(line.trim())
-        
+
         if (data.type === 'error') {
           throw new Error(data.content || 'Unknown error')
         } else if (data.type === 'message' || data.type === 'text') {
@@ -193,7 +203,7 @@ export async function sendToN8n(webhookUrl: string, message: string): Promise<st
         }
       }
     }
-    
+
     return finalResponse.trim() || 'No response received from the AI. Please check your n8n workflow configuration.'
   } catch (error) {
     console.error('n8n Error:', error)

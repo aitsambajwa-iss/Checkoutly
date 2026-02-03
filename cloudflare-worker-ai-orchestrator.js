@@ -21,7 +21,7 @@ export default {
     }
 
     const url = new URL(request.url);
-    
+
     if (url.pathname === '/chat' && request.method === 'POST') {
       try {
         const response = await handleChatRequest(request, env);
@@ -32,21 +32,21 @@ export default {
         return response;
       } catch (error) {
         console.error('Chat request error:', error);
-        return new Response(JSON.stringify({ 
+        return new Response(JSON.stringify({
           error: 'Internal server error',
-          message: error.message 
+          message: error.message
         }), {
           status: 500,
-          headers: { 
+          headers: {
             'Content-Type': 'application/json',
             ...corsHeaders
           }
         });
       }
     }
-    
+
     if (url.pathname === '/' || url.pathname === '') {
-      return new Response('Checkoutly AI Chat Worker - Ready and Fixed', { 
+      return new Response('Checkoutly AI Chat Worker - Ready and Fixed', {
         status: 200,
         headers: {
           'Content-Type': 'text/plain',
@@ -54,8 +54,8 @@ export default {
         }
       });
     }
-    
-    return new Response('Not Found', { 
+
+    return new Response('Not Found', {
       status: 404,
       headers: {
         'Content-Type': 'text/plain',
@@ -79,7 +79,7 @@ async function handleChatRequest(request, env) {
     const body = await request.json();
     const { message, chatInput, sessionId } = body;
     const userMessage = message || chatInput || '';
-    
+
     if (!userMessage.trim()) {
       return new Response(JSON.stringify({ error: 'Message is required' }), {
         status: 400,
@@ -89,22 +89,22 @@ async function handleChatRequest(request, env) {
 
     const chatId = sessionId || generateChatId();
     const tokensApplied = [];
-    
+
     // Step 1: Sanitize the message and store PII securely
     const sanitizedMessage = await sanitizeAndStore(userMessage, chatId, env, tokensApplied, 'user');
-    
+
     // Step 2: Send sanitized message to AI with n8n tools
     const aiResponse = await getAIResponseWithTools(sanitizedMessage, chatId, env);
-    
+
     // Step 3: Log the interaction for audit purposes
-    await logToSupabase(env, 
-      [{ role: 'user', content: userMessage }], 
-      [{ role: 'user', content: sanitizedMessage }], 
-      chatId, 
+    await logToSupabase(env,
+      [{ role: 'user', content: userMessage }],
+      [{ role: 'user', content: sanitizedMessage }],
+      chatId,
       tokensApplied
     );
-    
-    return new Response(JSON.stringify({ 
+
+    return new Response(JSON.stringify({
       response: aiResponse,
       chatId: chatId,
       tokensApplied: tokensApplied.length
@@ -112,12 +112,12 @@ async function handleChatRequest(request, env) {
       status: 200,
       headers: corsHeaders
     });
-    
+
   } catch (error) {
     console.error('Chat request error:', error);
-    return new Response(JSON.stringify({ 
+    return new Response(JSON.stringify({
       error: 'Internal server error',
-      message: error.message 
+      message: error.message
     }), {
       status: 500,
       headers: corsHeaders
@@ -129,25 +129,57 @@ async function getAIResponseWithTools(message, chatId, env) {
   try {
     // Get last mentioned product for this chat
     const lastProduct = chatMemory.get(chatId) || '';
-    
+
     // ALWAYS use AI with function calling - let AI decide when to call functions
     console.log('Using AI with function calling for message:', message);
-    
-    let systemPrompt = `You are a shopping assistant. You MUST ALWAYS call one of the available functions. NEVER return plain text.
+
+    let systemPrompt = `You are a professional salesperson for Checkoutly with deep knowledge of our inventory. You MUST ALWAYS call one of the available functions. NEVER return plain text alone.
 
 AVAILABLE FUNCTIONS:
-- product_lookup: for product questions
+- search_inventory: Use this for specific feature requests (size, color, price range) or when user asks for recommendations ("What do you suggest?", "Looking for red shoes under $100").
+- product_lookup: Use this when the user mentions a specific product name (e.g., "TrailMaster X") or specifically asks to "browse all products".
 - add_to_cart: for adding products to cart  
 - view_cart: for viewing cart contents
 
 RULES:
-- If user asks about a product → call product_lookup
-- If user wants to add/buy something → call add_to_cart with the EXACT product name
-- If user wants to see cart → call view_cart
+- Be a proactive salesperson. If a user asks for "shoes", search the inventory and suggest a few.
+- If user gives specific requirements (e.g., "size 42"), use search_inventory.
+- When user says they want to "buy" or "add" something, you MUST check if you have the **size** and **color**. If the user hasn't specified them, ASK for them before calling add_to_cart.
+- Use the EXACT product name from the conversation when calling tools.
+- Always be helpful and suggestive. If one thing isn't available, suggest another.
 
-IMPORTANT: When user says "I want to buy it", "add it to cart", etc., use the EXACT product name from the conversation, NOT "last mentioned product".
+SIZE CONVERSION KNOWLEDGE:
+Our inventory primarily uses **US sizes**. If a user provides a UK or EU size, convert it to the US equivalent before searching:
+| UK | US (Men) | US (Women) | EU |
+|----|----------|------------|----|
+| 3  | 4        | 5          | 35 |
+| 4  | 5        | 6          | 36 |
+| 5  | 6        | 7          | 37 |
+| 6  | 7        | 8          | 38 |
+| 6.5| 7.5      | 8.5        | 39 |
+| 7  | 8        | 9          | 40 |
+| 7.5| 8.5      | 9.5        | 41 |
+| 8  | 9        | 10         | 42 |
+| 9  | 10       | 11         | 43 |
+| 10 | 11       | 12         | 44 |
+| 10.5| 11.5     | 12.5       | 45 |
+| 11 | 12       | 13         | 46 |
+| 12 | 13       | 14         | 47 |
 
-YOU MUST CALL A FUNCTION. DO NOT return text like "Call add_to_cart". ACTUALLY CALL THE FUNCTION.`;
+- If an exact size isn't in the chart (e.g., EU 41.5), map it to the nearest US equivalent.
+- When a conversion happens, mention it: "I've searched for US size 8.5 to match your EU 41".
+
+PROFESSIONAL PERSONA & SAFETY:
+- You are a high-end salesperson for a premium B2B SaaS.
+- **Resilience**: If a user uses slang, informal language, or even offensive terms, stay calm and professional. Acknowledge their request but keep your language polished and helpful. Do NOT use slang back.
+- **Loopholes**: Never promise something that isn't in the inventory. If search returns no results, honestly suggest alternatives.
+
+RICH TEXT & UI RULES:
+- Use **bold text** for product names, prices, and important features.
+- When suggesting products from search results, you MUST embed them using this format: [PRODUCT:{"name":"Product Name","price":129.99,"description":"...","sizes":["..."],"colors":["..."],"image_url":"..."}]
+- Always provide a conversational description before or after the product tags.
+
+YOU MUST CALL A FUNCTION. DO NOT return text like "Call search_inventory". ACTUALLY CALL THE FUNCTION.`;
 
     if (lastProduct) {
       systemPrompt += `\n\nLast mentioned product: "${lastProduct}". When user says "add it", "I want it", "buy it" without specifying a product, use "${lastProduct}" as the product_name.`;
@@ -187,19 +219,56 @@ YOU MUST CALL A FUNCTION. DO NOT return text like "Call add_to_cart". ACTUALLY C
             }
           },
           {
+            name: 'search_inventory',
+            description: 'Search for products based on specific features like size, color, price, or description. Use this for recommendations or specific customer requests.',
+            parameters: {
+              type: 'object',
+              properties: {
+                query: {
+                  type: 'string',
+                  description: 'Search term for name or description (e.g., "running", "classic")'
+                },
+                size: {
+                  type: 'string',
+                  description: 'Specific size to search for (e.g., "42", "US 10")'
+                },
+                color: {
+                  type: 'string',
+                  description: 'Specific color to search for (e.g., "Red", "Black")'
+                },
+                min_price: {
+                  type: 'number',
+                  description: 'Minimum price filter'
+                },
+                max_price: {
+                  type: 'number',
+                  description: 'Maximum price filter'
+                }
+              }
+            }
+          },
+          {
             name: 'add_to_cart',
-            description: 'Add a specific product to the user\'s cart. Use when user shows ANY intent to purchase, buy, add, or get a product.',
+            description: 'Add a specific product to the user\'s cart. Use when user expresses intent to buy. If size/color aren\'t specified, ASK the user first.',
             parameters: {
               type: 'object',
               properties: {
                 product_name: {
                   type: 'string',
-                  description: 'EXACT product name to add to cart. If user says "add it", "I want it", "buy it" without specifying product name, use the EXACT name of the last mentioned product from conversation context. NEVER use placeholder text like "last mentioned product".'
+                  description: 'EXACT product name to add to cart.'
                 },
                 quantity: {
                   type: 'number',
                   description: 'Quantity to add (default: 1)',
                   default: 1
+                },
+                size: {
+                  type: 'string',
+                  description: 'Specified size (if any). Use US sizing mapping.'
+                },
+                color: {
+                  type: 'string',
+                  description: 'Specified color (if any).'
                 }
               },
               required: ['product_name']
@@ -252,20 +321,20 @@ YOU MUST CALL A FUNCTION. DO NOT return text like "Call add_to_cart". ACTUALLY C
 
     const data = await response.json();
     const aiMessage = data.choices[0]?.message;
-    
+
     console.log('AI Response:', JSON.stringify(aiMessage));
     console.log('Function call detected:', !!aiMessage.function_call);
     console.log('Message content:', aiMessage.content);
-    
+
     // Check if AI decided to call a function
     if (aiMessage.function_call) {
       console.log('AI decided to call function:', aiMessage.function_call);
       const functionName = aiMessage.function_call.name;
       const functionArgs = JSON.parse(aiMessage.function_call.arguments);
-      
+
       console.log(`Function: ${functionName}, Args:`, functionArgs);
       console.log(`Last product in memory for ${chatId}:`, chatMemory.get(chatId));
-      
+
       // Store the product name for future context
       if (functionName === 'product_lookup' && functionArgs.product_name && functionArgs.product_name !== 'all') {
         console.log(`Storing product in memory: ${functionArgs.product_name} for chat ${chatId}`);
@@ -274,14 +343,14 @@ YOU MUST CALL A FUNCTION. DO NOT return text like "Call add_to_cart". ACTUALLY C
         console.log(`Storing cart product in memory: ${functionArgs.product_name} for chat ${chatId}`);
         chatMemory.set(chatId, functionArgs.product_name);
       }
-      
+
       console.log('Calling n8n tool:', functionName, 'with args:', functionArgs);
-      
+
       // Call N8N to get the data
       const toolResult = await callN8nTool(functionName, functionArgs, chatId, env);
-      
+
       console.log('N8N tool result:', toolResult);
-      
+
       // Check if this is a client-side action that should be returned as JSON
       if (functionName === 'add_to_cart' || functionName === 'view_cart') {
         try {
@@ -294,17 +363,17 @@ YOU MUST CALL A FUNCTION. DO NOT return text like "Call add_to_cart". ACTUALLY C
           console.log('Tool result is not JSON, proceeding with AI formatting');
         }
       }
-      
+
       // Send the tool result BACK to AI for final formatting (for product_lookup and other functions)
       const finalResponse = await getAIFinalResponse(message, functionName, toolResult, env);
       return finalResponse;
     }
-    
+
     console.log('AI chose not to call any functions, returning direct response');
     console.log('Direct response content:', aiMessage.content);
     // If AI didn't call a function, return its direct response
     return aiMessage.content || 'How can I help you today?';
-    
+
   } catch (error) {
     console.error('AI API error:', error);
     return 'I\'m here to help with your shopping needs! How can I assist you today?';
@@ -314,7 +383,7 @@ YOU MUST CALL A FUNCTION. DO NOT return text like "Call add_to_cart". ACTUALLY C
 async function getAIFinalResponse(originalMessage, toolName, toolResult, env) {
   try {
     console.log('Getting AI final response for:', { originalMessage, toolName });
-    
+
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -326,7 +395,13 @@ async function getAIFinalResponse(originalMessage, toolName, toolResult, env) {
         messages: [
           {
             role: 'system',
-            content: 'You are a helpful shopping assistant. The user asked a question and you called a function to get data. Now provide a natural, conversational response using that data. Be friendly and helpful.'
+            content: `You are a helpful shopping assistant. The user asked a question and you called a function to get data. Now provide a natural, conversational response using that data. 
+
+RICH TEXT & UI RULES:
+1. Use **bold text** for product names, prices, and key features.
+2. If the data contains product details, you SHOULD embed them using this format: [PRODUCT:JSON_OBJECT]
+3. Map the data you received into the correct JSON structure for the [PRODUCT:] tag.
+4. Be friendly and helpful.`
           },
           {
             role: 'user',
@@ -338,10 +413,10 @@ async function getAIFinalResponse(originalMessage, toolName, toolResult, env) {
           },
           {
             role: 'user',
-            content: 'Please provide a natural, friendly response based on that data.'
+            content: 'Please provide a natural, friendly response. Use **bolding** and include [PRODUCT:] tags for any products mentioned in the data.'
           }
         ],
-        max_tokens: 200,
+        max_tokens: 500, // Increased to allow for JSON payloads
         temperature: 0.7
       })
     });
@@ -353,10 +428,10 @@ async function getAIFinalResponse(originalMessage, toolName, toolResult, env) {
 
     const data = await response.json();
     const finalResponse = data.choices[0]?.message?.content;
-    
+
     console.log('AI final response:', finalResponse);
     return finalResponse || toolResult;
-    
+
   } catch (error) {
     console.error('AI final response error:', error);
     return toolResult; // Fallback to raw tool result
@@ -365,33 +440,105 @@ async function getAIFinalResponse(originalMessage, toolName, toolResult, env) {
 
 function extractProductName(message) {
   const lowerMessage = message.toLowerCase();
-  
+
   // Check for specific product names first
   if (lowerMessage.includes('trailmaster')) return 'TrailMaster X';
-  if (lowerMessage.includes('aerorun')) return 'AeroRun Pro';  
+  if (lowerMessage.includes('aerorun')) return 'AeroRun Pro';
   if (lowerMessage.includes('urbanwalk')) return 'UrbanWalk Classic';
-  
+
   // For general shopping/product questions, return 'all' to browse all products
   // This matches your N8N workflow logic for browse_all = true
   const generalQuestions = [
-    'what products', 'show products', 'available', 'what do you have', 
+    'what products', 'show products', 'available', 'what do you have',
     'what\'s available', 'tell me about', 'all products', 'want to do shopping',
     'i want to shop', 'shopping', 'browse', 'what can i buy', 'what do you sell',
     'wanna do some shopping', 'yo wassup', 'wassup'
   ];
-  
+
   // Check if any general question pattern matches
   if (generalQuestions.some(q => lowerMessage.includes(q))) {
     return 'all'; // This will trigger browse_all = true in your N8N workflow
   }
-  
+
   // Default to 'all' for any product-related query
   return 'all';
 }
 
+// Search inventory directly in Supabase
+async function searchInventory(args, env) {
+  const { query, size, color, min_price, max_price } = args;
+  const baseUrl = `${env.SUPABASE_URL}/rest/v1/products`;
+  const params = new URLSearchParams();
+
+  params.append('select', '*');
+
+  // PostgREST filters
+  if (query) {
+    params.append('or', `(name.ilike.%${query}%,description.ilike.%${query}%)`);
+  }
+
+  if (size) {
+    params.append('sizes', `cs.{${size}}`);
+  }
+
+  if (color) {
+    params.append('colors', `cs.{${color}}`);
+  }
+
+  if (min_price !== undefined) {
+    params.append('price', `gte.${min_price}`);
+  }
+
+  if (max_price !== undefined) {
+    params.append('price', `lte.${max_price}`);
+  }
+
+  params.append('limit', '5');
+
+  try {
+    const url = `${baseUrl}?${params.toString()}`;
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'apikey': env.SUPABASE_KEY,
+        'Authorization': `Bearer ${env.SUPABASE_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      console.error('Inventory search failed:', await response.text());
+      return "I'm having trouble checking the inventory right now. Technical error.";
+    }
+
+    const data = await response.json();
+    if (data.length === 0) {
+      return "I checked our inventory but couldn't find any products matching those specific criteria. Would you like to see our most popular items instead?";
+    }
+
+    // Return a concise summary for the AI to format
+    return JSON.stringify(data.map(p => ({
+      name: p.name,
+      price: Number(p.price),
+      currency: p.currency || 'USD',
+      description: p.description,
+      available_sizes: p.sizes,
+      available_colors: p.colors
+    })));
+  } catch (error) {
+    console.error('Inventory search error:', error);
+    return `Error searching inventory: ${error.message}`;
+  }
+}
+
 async function callN8nTool(toolName, functionArgs, chatId, env) {
   console.log('callN8nTool called with:', { toolName, functionArgs, chatId });
-  
+
+  // Handle new inventory tool locally for faster response
+  if (toolName === 'search_inventory') {
+    return await searchInventory(functionArgs, env);
+  }
+
   const toolUrls = {
     'product_lookup': `${env.N8N_BASE_URL}/webhook/product-lookup`,
     'add_to_cart': 'CLIENT_SIDE_ACTION', // Special marker for client-side actions
@@ -403,19 +550,19 @@ async function callN8nTool(toolName, functionArgs, chatId, env) {
     'submit_review': 'https://bot.csautomaition.com/n8n-second/webhook/submit-reviews',
     'get_customer_info': `${env.N8N_BASE_URL}/webhook/get-customer-info`
   };
-  
+
   const webhookUrl = toolUrls[toolName];
   console.log('Webhook URL:', webhookUrl);
-  
+
   if (!webhookUrl) {
     return `Error: Unknown tool ${toolName}`;
   }
-  
+
   // Handle client-side actions
   if (webhookUrl === 'CLIENT_SIDE_ACTION') {
     if (toolName === 'add_to_cart') {
       let productName = functionArgs.product_name;
-      
+
       // If AI passed "all" but we have a last mentioned product, use that instead
       if (productName === 'all') {
         const lastProduct = chatMemory.get(chatId);
@@ -429,15 +576,15 @@ async function callN8nTool(toolName, functionArgs, chatId, env) {
           });
         }
       }
-      
+
       // Return a special response that the client will interpret
-      // Note: We're not including size/color here - user will select during checkout
       return JSON.stringify({
         action: 'add_to_cart',
         product_name: productName,
         quantity: functionArgs.quantity || 1,
-        // Don't include size/color - let user choose during checkout
-        message: `✅ Added ${productName} to your cart! You can view your cart anytime by clicking the cart button.`
+        size: functionArgs.size || '', // Pass size if provided by AI
+        color: functionArgs.color || '', // Pass color if provided by AI
+        message: `✅ Added ${productName}${functionArgs.size ? ` (Size ${functionArgs.size})` : ''} to your cart!`
       });
     } else if (toolName === 'view_cart') {
       return JSON.stringify({
@@ -446,10 +593,10 @@ async function callN8nTool(toolName, functionArgs, chatId, env) {
       });
     }
   }
-  
+
   try {
     let payload;
-    
+
     // Handle different tool types with appropriate payloads
     if (toolName === 'product_lookup') {
       payload = {
@@ -512,7 +659,7 @@ async function callN8nTool(toolName, functionArgs, chatId, env) {
 
     const result = await response.text();
     console.log('N8N raw result:', result);
-    
+
     // Try to parse as JSON
     try {
       const jsonResult = JSON.parse(result);
@@ -527,7 +674,7 @@ async function callN8nTool(toolName, functionArgs, chatId, env) {
       }
       return `No response from ${toolName}`;
     }
-    
+
   } catch (error) {
     console.log('N8N call error:', error);
     return `Network error calling ${toolName}: ${error.message}`;
@@ -541,41 +688,47 @@ function generateChatId() {
 
 function convertWordsToDigits(text) {
   if (typeof text !== 'string') return text;
-  
+
   let result = text.toLowerCase();
-  
+
   // Handle "two thousand twenty X" year format
   result = result.replace(
     /\btwo\s+thousand\s+(twenty|thirty|forty|fifty)[\s-]*(one|two|three|four|five|six|seven|eight|nine)?\b/gi,
     (_, decade, unit) => {
       const decades = { 'twenty': '2', 'thirty': '3', 'forty': '4', 'fifty': '5' };
-      const ones = { 'one': '1', 'two': '2', 'three': '3', 'four': '4', 'five': '5',
-                      'six': '6', 'seven': '7', 'eight': '8', 'nine': '9' };
+      const ones = {
+        'one': '1', 'two': '2', 'three': '3', 'four': '4', 'five': '5',
+        'six': '6', 'seven': '7', 'eight': '8', 'nine': '9'
+      };
       let year = '20' + decades[decade.toLowerCase()];
       year += unit ? ones[unit.toLowerCase()] : '0';
       return year;
     }
   );
-  
+
   // Handle STT misinterpretations
   result = result.replace(/\b(or|for)\b(?=\s+(?:zero|oh|one|two|three|four|five|six|seven|eight|nine|o|\d))/gi, 'four');
-  
+
   // Handle "double" and "triple"
   result = result.replace(/\bdouble\s+(zero|oh|one|two|three|four|five|six|seven|eight|nine|o|\d)/gi, '$1 $1');
   result = result.replace(/\btriple\s+(zero|oh|one|two|three|four|five|six|seven|eight|nine|o|\d)/gi, '$1 $1 $1');
-  
+
   // Handle compound numbers
-  const compounds = { 'twenty': '2', 'thirty': '3', 'forty': '4', 'fifty': '5',
-                      'sixty': '6', 'seventy': '7', 'eighty': '8', 'ninety': '9' };
-  const onesMap = { 'one': '1', 'two': '2', 'three': '3', 'four': '4', 'five': '5',
-                    'six': '6', 'seven': '7', 'eight': '8', 'nine': '9', 'zero': '0', 'oh': '0' };
-  
+  const compounds = {
+    'twenty': '2', 'thirty': '3', 'forty': '4', 'fifty': '5',
+    'sixty': '6', 'seventy': '7', 'eighty': '8', 'ninety': '9'
+  };
+  const onesMap = {
+    'one': '1', 'two': '2', 'three': '3', 'four': '4', 'five': '5',
+    'six': '6', 'seven': '7', 'eight': '8', 'nine': '9', 'zero': '0', 'oh': '0'
+  };
+
   for (const [tens, tensDigit] of Object.entries(compounds)) {
     for (const [unit, unitDigit] of Object.entries(onesMap)) {
       result = result.replace(new RegExp(`\\b${tens}[\\s-]*${unit}\\b`, 'gi'), tensDigit + unitDigit);
     }
   }
-  
+
   // Single digit word replacements
   const wordToDigit = {
     'zero': '0', 'oh': '0', 'o': '0',
@@ -583,11 +736,11 @@ function convertWordsToDigits(text) {
     'six': '6', 'seven': '7', 'eight': '8', 'nine': '9',
     'ten': '10', 'eleven': '11', 'twelve': '12'
   };
-  
+
   for (const [word, digit] of Object.entries(wordToDigit)) {
     result = result.replace(new RegExp(`\\b${word}\\b`, 'gi'), digit);
   }
-  
+
   return result;
 }
 
@@ -607,7 +760,7 @@ async function storeInSupabase(env, data) {
       },
       body: JSON.stringify(data)
     });
-    
+
     if (!res.ok) {
       console.error('Supabase error:', await res.text());
     }
@@ -618,21 +771,21 @@ async function storeInSupabase(env, data) {
 
 async function sanitizeAndStore(text, callId, env, tokensApplied = [], messageRole = 'user') {
   if (typeof text !== 'string') return text;
-  
+
   // Only tokenize user messages
   if (messageRole !== 'user') {
     return text;
   }
-  
+
   // Skip if already contains tokens
   const tokenTypes = ['[CARD:', '[CVV:', '[EXPIRY:', '[NAME:', '[EMAIL:', '[MONTH:', '[YEAR:', '[PHONE:', '[ADDRESS:'];
   if (tokenTypes.some(t => text.includes(t))) {
     return text;
   }
-  
+
   let result = text;
   const processedText = convertWordsToDigits(text);
-  
+
   // === 1. CARD NUMBER DETECTION (Enhanced) ===
   const cardPattern = /(?:\d[\s-]*){15,16}\d?/g;
   const cardMatch = processedText.match(cardPattern);
@@ -641,7 +794,7 @@ async function sanitizeAndStore(text, callId, env, tokensApplied = [], messageRo
     if (cleanCard.length >= 15 && cleanCard.length <= 16) {
       const token = generateToken();
       tokensApplied.push({ type: 'card', token });
-      
+
       await storeInSupabase(env, {
         token,
         type: 'card_number',
@@ -649,11 +802,11 @@ async function sanitizeAndStore(text, callId, env, tokensApplied = [], messageRo
         call_id: callId,
         created_at: new Date().toISOString()
       });
-      
+
       return `[CARD:${token}]`;
     }
   }
-  
+
   // === 2. PHONE NUMBER DETECTION (Enhanced) ===
   const phonePatterns = [
     /(?:\+1[-.\s]?)?\(?([0-9]{3})\)?[-.\s]?([0-9]{3})[-.\s]?([0-9]{4})/g, // US format
@@ -662,7 +815,7 @@ async function sanitizeAndStore(text, callId, env, tokensApplied = [], messageRo
     /(?:\+\d{1,3}[-.\s]?)?(?:\(?0\)?[-.\s]?)?([0-9]{10,15})/g, // Generic international
     /(?:phone|number|contact)\s*:?\s*([0-9]{10,15})/gi // "phone number is 03354569322"
   ];
-  
+
   for (const phonePattern of phonePatterns) {
     const phoneMatch = result.match(phonePattern);
     if (phoneMatch) {
@@ -677,7 +830,7 @@ async function sanitizeAndStore(text, callId, env, tokensApplied = [], messageRo
       }
     }
   }
-  
+
   // === 3. ADDRESS DETECTION (Enhanced) ===
   const addressPatterns = [
     /(?:address|live|located)\s*:?\s*(.+(?:street|st|avenue|ave|road|rd|boulevard|blvd|lane|ln|drive|dr|court|ct|place|pl|pakistan|india|usa|uk|canada).+)/gi,
@@ -685,7 +838,7 @@ async function sanitizeAndStore(text, callId, env, tokensApplied = [], messageRo
     /\b\d+\s+[A-Za-z\s]+,\s*[A-Za-z\s]+,\s*[A-Z]{2}\s*\d{5}/gi, // US format with state and zip
     /(?:street|st)\s+\d+[^.!?]*(?:pakistan|india|usa|uk|canada|city)/gi // "Street 3, ISS, Pakistan"
   ];
-  
+
   for (const addressPattern of addressPatterns) {
     const addressMatch = result.match(addressPattern);
     if (addressMatch) {
@@ -699,20 +852,20 @@ async function sanitizeAndStore(text, callId, env, tokensApplied = [], messageRo
       }
     }
   }
-  
+
   // === 4. NAME DETECTION (Enhanced) ===
   const nameWithPrefixPattern = /(?:my\s+name\s+is|name\s+is|i'?m|i\s+am|this\s+is|it'?s|call\s+me|my\s+name)\s+([A-Za-z][A-Za-z'-]*(?:\s+[A-Za-z][A-Za-z'-]*)*)/i;
   const fullNamePattern = /^([A-Z][a-z'-]+(?:\s+[A-Z][a-z'-]+)*)\.?$/;
-  
+
   const skipWords = new Set([
-    'yes', 'no', 'the', 'a', 'an', 'is', 'it', 'and', 'or', 'yeah', 'okay', 'ok', 'sure', 
-    'hi', 'hello', 'bye', 'thanks', 'thank', 'please', 'sorry', 'wait', 'waiting', 
+    'yes', 'no', 'the', 'a', 'an', 'is', 'it', 'and', 'or', 'yeah', 'okay', 'ok', 'sure',
+    'hi', 'hello', 'bye', 'thanks', 'thank', 'please', 'sorry', 'wait', 'waiting',
     'good', 'great', 'nice', 'fine', 'looking', 'something', 'anything', 'nothing',
     'everything', 'someone', 'anyone', 'everyone', 'somewhere', 'anywhere', 'everywhere',
     'type', 'kind', 'sort', 'style', 'way', 'thing', 'stuff', 'item', 'product',
     'sneaker', 'shoe', 'shoes', 'sneakers', 'running', 'walking', 'casual'
   ]);
-  
+
   let nameMatch = result.match(nameWithPrefixPattern);
   if (nameMatch) {
     const name = nameMatch[1].trim();
@@ -724,7 +877,7 @@ async function sanitizeAndStore(text, callId, env, tokensApplied = [], messageRo
       return result.replace(nameMatch[0], nameMatch[0].replace(name, `[NAME:${token}]`));
     }
   }
-  
+
   nameMatch = result.match(fullNamePattern);
   if (nameMatch) {
     const name = nameMatch[1].trim();
@@ -736,12 +889,12 @@ async function sanitizeAndStore(text, callId, env, tokensApplied = [], messageRo
       return `[NAME:${token}]`;
     }
   }
-  
+
   // === 5. EMAIL DETECTION (Enhanced) ===
   const typedEmailPattern = /\b([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})\b/gi;
   const spokenEmailPattern = /\b([A-Za-z0-9._%+-]+)\s+(?:at)\s+([A-Za-z0-9.-]+)\s+(?:dot)\s+([A-Za-z]{2,})\b/gi;
   const emailMentionPattern = /(?:my\s+email\s+is|email\s+is|contact\s+me\s+at)\s+([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})/gi;
-  
+
   // Check for explicit email mentions first
   let emailMatch = result.match(emailMentionPattern);
   if (emailMatch) {
@@ -751,7 +904,7 @@ async function sanitizeAndStore(text, callId, env, tokensApplied = [], messageRo
     await storeInSupabase(env, { token, type: 'email', value: email, call_id: callId, created_at: new Date().toISOString() });
     return result.replace(emailMatch[0], emailMatch[0].replace(email, `[EMAIL:${token}]`));
   }
-  
+
   // Check for regular email patterns
   emailMatch = result.match(typedEmailPattern);
   if (emailMatch) {
@@ -761,7 +914,7 @@ async function sanitizeAndStore(text, callId, env, tokensApplied = [], messageRo
     await storeInSupabase(env, { token, type: 'email', value: email, call_id: callId, created_at: new Date().toISOString() });
     return result.replace(emailMatch[0], `[EMAIL:${token}]`);
   }
-  
+
   // Check for spoken email patterns
   emailMatch = result.match(spokenEmailPattern);
   if (emailMatch) {
@@ -771,7 +924,7 @@ async function sanitizeAndStore(text, callId, env, tokensApplied = [], messageRo
     await storeInSupabase(env, { token, type: 'email', value: email, call_id: callId, created_at: new Date().toISOString() });
     return result.replace(emailMatch[0], `[EMAIL:${token}]`);
   }
-  
+
   // === 6. CVV DETECTION (Enhanced) ===
   const cvvPatterns = [
     /(?:cvv|cvc|security\s+code)\s*:?\s*(\d{3,4})/gi,
@@ -794,14 +947,14 @@ async function sanitizeAndStore(text, callId, env, tokensApplied = [], messageRo
       }
     }
   }
-  
+
   // === 7. EXPIRY DATE DETECTION (New) ===
   const expiryPatterns = [
     /(?:exp|expiry|expires?)\s*:?\s*(\d{1,2}\/\d{2,4})/gi,
     /(?:exp|expiry|expires?)\s*:?\s*(\d{1,2}[-]\d{2,4})/gi,
     /\b(\d{1,2}\/\d{2,4})\b/g // Standalone MM/YY or MM/YYYY
   ];
-  
+
   for (const expiryPattern of expiryPatterns) {
     const expiryMatch = result.match(expiryPattern);
     if (expiryMatch) {
@@ -820,7 +973,7 @@ async function sanitizeAndStore(text, callId, env, tokensApplied = [], messageRo
       }
     }
   }
-  
+
   return result;
 }
 
@@ -829,7 +982,7 @@ async function logToSupabase(env, originalMessages, sanitizedMessages, callId, t
     for (let i = 0; i < originalMessages.length; i++) {
       const original = originalMessages[i].content;
       const sanitized = sanitizedMessages[i].content;
-      
+
       if (original !== sanitized) {
         await fetch(`${env.SUPABASE_URL}/rest/v1/llm_audit_logs`, {
           method: 'POST',

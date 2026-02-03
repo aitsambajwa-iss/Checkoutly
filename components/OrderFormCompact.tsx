@@ -46,7 +46,7 @@ export default function OrderFormCompact({ product, cartItems, onSubmit, onCance
   const isMultiItem = cartItems && cartItems.length > 1
   const [step, setStep] = useState(1)
   const totalSteps = 3
-  
+
   const [formData, setFormData] = useState<OrderData>({
     product_name: product.name,
     size: '',
@@ -95,176 +95,250 @@ export default function OrderFormCompact({ product, cartItems, onSubmit, onCance
           {Array.from({ length: totalSteps }).map((_, i) => (
             <div
               key={i}
-              className={`h-1 flex-1 rounded-full transition-all duration-300 ${
-                i < step ? 'bg-[#00E5FF]' : 'bg-[#2A2A2A]'
-              }`}
+              className={`h-1 flex-1 rounded-full transition-all duration-300 ${i < step ? 'bg-[#00E5FF]' : 'bg-[#2A2A2A]'
+                }`}
             />
           ))}
         </div>
       </div>
-      
+
       {/* Form Content */}
-      <div className="flex-1">
+      <div className="flex-1 overflow-y-auto pr-1 custom-scrollbar" style={{ maxHeight: '400px' }}>
         {step === 1 && (
-          <div className="space-y-3">
-            <div className="p-2 bg-[#1A1A1A] rounded-lg border border-[#2A2A2A]">
-              <div className="text-sm text-[#B0B0B0]">{product.name}</div>
-              <div className="text-base font-mono text-[#00E5FF]">${product.price.toFixed(2)}</div>
-            </div>
-            
-            {!isMultiItem && (
-              <>
-                <div className="grid grid-cols-2 gap-2">
+          <div className="space-y-4">
+            {!isMultiItem ? (
+              <div className="space-y-3">
+                <div className="p-3 bg-[#1A1A1A] rounded-lg border border-[#2A2A2A]">
+                  <div className="text-sm font-semibold text-white">{product.name}</div>
+                  <div className="text-base font-mono text-[#00E5FF] mt-1">${product.price.toFixed(2)}</div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs text-[#B0B0B0] mb-1 block">Size</label>
-                    <select 
+                    <label className="text-xs text-[#B0B0B0] mb-1.5 block uppercase tracking-wider font-semibold">Size</label>
+                    <select
                       value={formData.size}
                       onChange={(e) => handleInputChange('size', e.target.value)}
-                      className="w-full px-2 py-1.5 bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg text-white text-sm focus:border-[#00E5FF] focus:outline-none"
+                      className="w-full px-3 py-2 bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg text-white text-sm focus:border-[#00E5FF] focus:outline-none transition-all"
                     >
-                      <option value="">Select</option>
+                      <option value="">Select Size</option>
                       {product.sizes?.map(size => (
                         <option key={size} value={size}>{size}</option>
                       ))}
                     </select>
                   </div>
-                  
+
                   <div>
-                    <label className="text-xs text-[#B0B0B0] mb-1 block">Color</label>
-                    <select 
+                    <label className="text-xs text-[#B0B0B0] mb-1.5 block uppercase tracking-wider font-semibold">Color</label>
+                    <select
                       value={formData.color}
                       onChange={(e) => handleInputChange('color', e.target.value)}
-                      className="w-full px-2 py-1.5 bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg text-white text-sm focus:border-[#00E5FF] focus:outline-none"
+                      className="w-full px-3 py-2 bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg text-white text-sm focus:border-[#00E5FF] focus:outline-none transition-all"
                     >
-                      <option value="">Select</option>
+                      <option value="">Select Color</option>
                       {product.colors?.map(color => (
                         <option key={color} value={color}>{color}</option>
                       ))}
                     </select>
                   </div>
                 </div>
-                
+
                 <div>
-                  <label className="text-xs text-[#B0B0B0] mb-1 block">Quantity</label>
-                  <div className="flex items-center gap-2">
-                    <button 
+                  <label className="text-xs text-[#B0B0B0] mb-1.5 block uppercase tracking-wider font-semibold">Quantity</label>
+                  <div className="flex items-center gap-3">
+                    <button
                       type="button"
                       onClick={() => handleInputChange('quantity', Math.max(1, formData.quantity - 1))}
-                      className="w-8 h-8 bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg hover:border-[#00E5FF] transition-all duration-300 text-sm"
+                      className="w-10 h-10 flex items-center justify-center bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg hover:border-[#00E5FF] transition-all text-white"
                     >
-                      −
+                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M5 12h14" /></svg>
                     </button>
-                    <span className="flex-1 text-center font-mono text-white text-sm">{formData.quantity}</span>
-                    <button 
+                    <span className="flex-1 text-center font-mono font-bold text-white text-lg">{formData.quantity}</span>
+                    <button
                       type="button"
                       onClick={() => handleInputChange('quantity', formData.quantity + 1)}
-                      className="w-8 h-8 bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg hover:border-[#00E5FF] transition-all duration-300 text-sm"
+                      className="w-10 h-10 flex items-center justify-center bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg hover:border-[#00E5FF] transition-all text-white"
                     >
-                      +
+                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 5v14M5 12h14" /></svg>
                     </button>
                   </div>
                 </div>
-              </>
-            )}
-            
-            {isMultiItem && (
-              <div className="text-sm text-[#B0B0B0]">
-                Multi-item order with {cartItems?.length} products
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="text-sm font-semibold text-[#00E5FF] bg-[#00E5FF]/10 px-3 py-2 rounded-lg border border-[#00E5FF]/20">
+                  Select options for each item in your cart ({cartItems?.length} items)
+                </div>
+                {formData.items?.map((item, index) => {
+                  const productInCart = cartItems?.find(p => p.name === item.product_name);
+                  return (
+                    <div key={index} className="p-3 bg-[#1A1A1A] rounded-lg border border-[#2A2A2A] space-y-3">
+                      <div className="flex justify-between items-start">
+                        <div className="text-sm font-semibold text-white">{item.product_name}</div>
+                        <div className="text-xs font-mono text-[#00E5FF]">${(productInCart?.price || 0).toFixed(2)} x {item.quantity}</div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="text-[10px] text-[#6B6B6B] mb-1 block uppercase font-bold">Size</label>
+                          <select
+                            value={item.size}
+                            onChange={(e) => {
+                              const newItems = [...(formData.items || [])];
+                              newItems[index].size = e.target.value;
+                              setFormData(prev => ({ ...prev, items: newItems }));
+                            }}
+                            className="w-full px-2 py-1.5 bg-[#0F0F0F] border border-[#2A2A2A] rounded text-white text-xs focus:border-[#00E5FF] focus:outline-none"
+                          >
+                            <option value="">Select</option>
+                            {productInCart?.sizes?.map(s => (
+                              <option key={s} value={s}>{s}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="text-[10px] text-[#6B6B6B] mb-1 block uppercase font-bold">Color</label>
+                          <select
+                            value={item.color}
+                            onChange={(e) => {
+                              const newItems = [...(formData.items || [])];
+                              newItems[index].color = e.target.value;
+                              setFormData(prev => ({ ...prev, items: newItems }));
+                            }}
+                            className="w-full px-2 py-1.5 bg-[#0F0F0F] border border-[#2A2A2A] rounded text-white text-xs focus:border-[#00E5FF] focus:outline-none"
+                          >
+                            <option value="">Select</option>
+                            {productInCart?.colors?.map(c => (
+                              <option key={c} value={c}>{c}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
         )}
-        
+
         {step === 2 && (
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div>
-              <label className="text-xs text-[#B0B0B0] mb-1 block">Full Name</label>
+              <label className="text-xs text-[#B0B0B0] mb-1.5 block uppercase tracking-wider font-semibold">Full Name</label>
               <input
                 type="text"
                 value={formData.customer_name}
                 onChange={(e) => handleInputChange('customer_name', e.target.value)}
-                className="w-full px-2 py-1.5 bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg text-white text-sm focus:border-[#00E5FF] focus:outline-none"
+                className="w-full px-3 py-2 bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg text-white text-sm focus:border-[#00E5FF] focus:outline-none placeholder-[#333]"
                 placeholder="John Doe"
               />
             </div>
-            
+
             <div>
-              <label className="text-xs text-[#B0B0B0] mb-1 block">Email</label>
+              <label className="text-xs text-[#B0B0B0] mb-1.5 block uppercase tracking-wider font-semibold">Email Address</label>
               <input
                 type="email"
                 value={formData.customer_email}
                 onChange={(e) => handleInputChange('customer_email', e.target.value)}
-                className="w-full px-2 py-1.5 bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg text-white text-sm focus:border-[#00E5FF] focus:outline-none"
+                className="w-full px-3 py-2 bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg text-white text-sm focus:border-[#00E5FF] focus:outline-none placeholder-[#333]"
                 placeholder="john@example.com"
               />
             </div>
-            
+
             <div>
-              <label className="text-xs text-[#B0B0B0] mb-1 block">Phone</label>
+              <label className="text-xs text-[#B0B0B0] mb-1.5 block uppercase tracking-wider font-semibold">Phone Number</label>
               <input
                 type="tel"
                 value={formData.customer_phone}
                 onChange={(e) => handleInputChange('customer_phone', e.target.value)}
-                className="w-full px-2 py-1.5 bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg text-white text-sm focus:border-[#00E5FF] focus:outline-none"
+                className="w-full px-3 py-2 bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg text-white text-sm focus:border-[#00E5FF] focus:outline-none placeholder-[#333]"
                 placeholder="+1 (555) 000-0000"
               />
             </div>
           </div>
         )}
-        
+
         {step === 3 && (
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div>
-              <label className="text-xs text-[#B0B0B0] mb-1 block">Shipping Address</label>
+              <label className="text-xs text-[#B0B0B0] mb-1.5 block uppercase tracking-wider font-semibold">Shipping Address</label>
               <textarea
                 rows={3}
                 value={formData.shipping_address}
                 onChange={(e) => handleInputChange('shipping_address', e.target.value)}
-                className="w-full px-2 py-1.5 bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg text-white text-sm focus:border-[#00E5FF] focus:outline-none resize-none"
+                className="w-full px-3 py-2 bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg text-white text-sm focus:border-[#00E5FF] focus:outline-none resize-none placeholder-[#333]"
                 placeholder="123 Main St&#10;Apt 4B&#10;New York, NY 10001"
               />
             </div>
-            
-            <div className="p-2 bg-[#1A1A1A] rounded-lg">
-              <div className="flex justify-between text-xs mb-1">
-                <span className="text-[#B0B0B0]">Subtotal</span>
-                <span className="text-white">${calculateTotal().toFixed(2)}</span>
+
+            <div className="p-3 bg-[#1A1A1A] rounded-lg border border-[#2A2A2A]">
+              <div className="flex justify-between text-xs mb-2">
+                <span className="text-[#6B6B6B]">Subtotal</span>
+                <span className="text-white font-mono">${calculateTotal().toFixed(2)}</span>
               </div>
-              <div className="flex justify-between text-xs mb-1">
-                <span className="text-[#B0B0B0]">Shipping</span>
-                <span className="text-white">$10.00</span>
+              <div className="flex justify-between text-xs mb-2">
+                <span className="text-[#6B6B6B]">Estimated Shipping</span>
+                <span className="text-white font-mono">$10.00</span>
               </div>
-              <div className="border-t border-[#2A2A2A] my-1"></div>
-              <div className="flex justify-between font-semibold text-sm">
-                <span className="text-white">Total</span>
+              <div className="border-t border-[#2A2A2A] my-2"></div>
+              <div className="flex justify-between font-bold text-base">
+                <span className="text-white">Order Total</span>
                 <span className="text-[#00E5FF] font-mono">${(calculateTotal() + 10).toFixed(2)}</span>
               </div>
             </div>
           </div>
         )}
       </div>
-      
+
       {/* Actions - Always visible at bottom */}
-      <div className="flex gap-2 mt-3 pt-3 border-t border-[#2A2A2A]">
+      <div className="flex gap-2 mt-4 pt-4 border-t border-[#2A2A2A]">
         {step > 1 && (
           <button
             onClick={() => setStep(step - 1)}
-            className="flex-1 px-3 py-2 bg-[#1A1A1A] text-white rounded-lg border border-[#2A2A2A] hover:border-[#00E5FF] transition-all duration-300 font-medium text-sm"
+            className="flex-1 px-4 py-2.5 bg-[#1A1A1A] text-[#B0B0B0] rounded-lg border border-[#2A2A2A] hover:border-[#00E5FF] hover:text-white transition-all font-semibold text-sm"
           >
             Back
           </button>
         )}
-        
+
         <button
-          onClick={() => step < 3 ? setStep(step + 1) : handleSubmit()}
-          className="flex-1 px-3 py-2 bg-[#00E5FF] text-black rounded-lg hover:bg-[#00B8D4] transition-all duration-300 font-semibold text-sm"
+          onClick={() => {
+            // Validation for Step 1
+            if (step === 1) {
+              if (isMultiItem) {
+                const incomplete = formData.items?.some(item => !item.size || !item.color);
+                if (incomplete) {
+                  alert("Please select size and color for all items.");
+                  return;
+                }
+              } else {
+                if (!formData.size || !formData.color) {
+                  alert("Please select a size and color.");
+                  return;
+                }
+              }
+            } else if (step === 2) {
+              if (!formData.customer_name || !formData.customer_email) {
+                alert("Please provide your name and email.");
+                return;
+              }
+            } else if (step === 3) {
+              if (!formData.shipping_address) {
+                alert("Please provide a shipping address.");
+                return;
+              }
+            }
+
+            step < 3 ? setStep(step + 1) : handleSubmit()
+          }}
+          className="flex-[2] px-4 py-2.5 bg-[#00E5FF] text-black rounded-lg hover:bg-[#00B8D4] transform hover:scale-[1.02] active:scale-[0.98] transition-all font-bold text-sm shadow-[0_0_20px_rgba(0,229,255,0.3)]"
         >
-          {step === 3 ? 'Place Order' : 'Continue'}
+          {step === 3 ? 'Complete Purchase' : 'Continue'}
         </button>
-        
+
         <button
           onClick={onCancel}
-          className="px-3 py-2 text-[#6B6B6B] hover:text-white transition-all duration-300 text-sm"
+          className="px-4 py-2.5 text-[#6B6B6B] hover:text-white transition-all text-sm font-medium"
         >
           Cancel
         </button>

@@ -89,7 +89,7 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
   const [stickyProduct, setStickyProduct] = useState<Product | null>(null)
   const [isDragOver, setIsDragOver] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
-  
+
   // Initialize messages after hydration to avoid mismatch
   useEffect(() => {
     setMessages([{
@@ -107,12 +107,12 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   // Calculate cart totals (memoized for performance)
-  const itemCount = useMemo(() => 
-    cartItems.reduce((sum, item) => sum + item.quantity, 0), 
+  const itemCount = useMemo(() =>
+    cartItems.reduce((sum, item) => sum + item.quantity, 0),
     [cartItems]
   )
-  const cartTotal = useMemo(() => 
-    cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0), 
+  const cartTotal = useMemo(() =>
+    cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0),
     [cartItems]
   )
 
@@ -122,14 +122,14 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
       // Get actual product data from Supabase
       const { getAllProducts } = await import('@/lib/products')
       const products = await getAllProducts()
-      
+
       const product = products.find(p => p.name === productName)
-      
+
       if (!product) {
         addMessage(`❌ Product "${productName}" not found.`, false)
         return
       }
-      
+
       const newItem: CartItem = {
         id: generateId(),
         name: productName,
@@ -142,11 +142,11 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
         product_id: product.id,
         image_url: product.image_url
       }
-      
+
       setCartItems(prev => [...prev, newItem])
       showSuccessToast(`Added ${productName} to cart!`)
       addMessage(`✅ Added ${productName} (${options.size}, ${options.color}) to your cart! Say "checkout" when ready to order.`, false)
-      
+
     } catch (error) {
       console.error('Error adding to cart:', error)
       addMessage(`❌ Sorry, there was an error adding ${productName} to your cart.`, false)
@@ -162,42 +162,46 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
   }, [onExternalAddToCart, addToCartWithOptions])
 
   // Add item to internal cart
-  const addToCart = async (productName: string, quantity: number = 1) => {
+  const addToCart = async (productName: string, quantity: number = 1, size: string = '', color: string = '') => {
     try {
       // Get actual product data from Supabase
       const { getAllProducts } = await import('@/lib/products')
       const products = await getAllProducts()
-      
+
       const product = products.find(p => p.name === productName)
-      
+
       if (!product) {
         addMessage(`❌ Product "${productName}" not found.`, false)
         return
       }
-      
+
       const newItem: CartItem = {
         id: generateId(),
         name: productName,
         price: Number(product.price),
         quantity,
+        size: size || '',
+        color: color || '',
         sizes: product.sizes,
         colors: product.colors,
         product_id: product.id,
         image_url: product.image_url
       }
-      
+
       setCartItems(prev => [...prev, newItem])
       showSuccessToast(`Added ${productName} to cart!`)
-      
+
     } catch (error) {
       console.error('Error adding to cart:', error)
-      // Fallback to old method
+      // Fallback
       const price = getProductPrice(productName)
       const newItem: CartItem = {
         id: generateId(),
         name: productName,
         price,
         quantity,
+        size: size || '',
+        color: color || '',
         sizes: ['US 6', 'US 7', 'US 8', 'US 9', 'US 10', 'US 11', 'US 12', 'US 13'],
         colors: ['Black', 'White', 'Gray', 'Navy', 'Brown']
       }
@@ -218,10 +222,10 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
       return
     }
 
-    const cartSummary = cartItems.map(item => 
-      `• ${item.name} - $${item.price} × ${item.quantity} = $${(item.price * item.quantity).toFixed(2)}`
+    const cartSummary = cartItems.map(item =>
+      `• ${item.name}${item.size || item.color ? ` (${[item.size, item.color].filter(Boolean).join(', ')})` : ''} - $${item.price} × ${item.quantity} = $${(item.price * item.quantity).toFixed(2)}`
     ).join('\n')
-    
+
     addMessage(`🛒 Your Cart:\n${cartSummary}\n\nTotal: $${cartTotal.toFixed(2)}\n\nSay "checkout" to place your order!`, false)
   }
 
@@ -229,7 +233,7 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
   const handleProductDetails = (product: Product) => {
     setStickyProduct(product)
     addMessage(`Here are the details for ${product.name}:`, false)
-    
+
     // Add inline product card to messages
     const productMessage: Message = {
       id: generateId(),
@@ -265,20 +269,20 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault()
     setIsDragOver(false)
-    
+
     try {
       const productData = e.dataTransfer.getData('application/json')
       if (productData) {
         const product = JSON.parse(productData)
-        
+
         // Show success ripple animation
         const chatContainer = e.currentTarget as HTMLElement
         const ripple = document.createElement('div')
         ripple.className = 'absolute top-1/2 left-1/2 w-24 h-24 -mt-12 -ml-12 border-4 border-[#00E5FF] rounded-full animate-ping pointer-events-none'
         chatContainer.appendChild(ripple)
-        
+
         setTimeout(() => ripple.remove(), 600)
-        
+
         // Send message with slight delay for effect
         setTimeout(() => {
           handleUserMessage(`Tell me about ${product.name}`)
@@ -338,47 +342,47 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
 
   const handleUserMessage = useCallback(async (message: string) => {
     if (isTyping) return
-    
+
     console.log('User message:', message)
     console.log('Current completedOrder:', completedOrder)
-    
+
     addMessage(message, true)
-    
+
     // Check for payment intent BEFORE sending to AI
     const paymentTriggers = ['pay now', 'pay for', 'payment', 'pay it', 'yes pay', 'proceed to pay', 'make payment', 'yes', 'sure', 'okay', 'ok']
     const reviewTriggers = ['leave a review', 'write a review', 'review', 'rate', 'feedback', 'comment', 'leave feedback', 'write feedback', 'give feedback']
     const cartTriggers = ['show cart', 'view cart', 'what\'s in my cart', 'check cart', 'see cart']
     const checkoutTriggers = ['checkout', 'place order', 'order now', 'buy now', 'proceed to checkout']
-    
-    const isPaymentIntent = paymentTriggers.some(trigger => message.toLowerCase().trim() === trigger.toLowerCase()) || 
-                           (message.toLowerCase().trim() === 'yes' && completedOrder)
+
+    const isPaymentIntent = paymentTriggers.some(trigger => message.toLowerCase().trim() === trigger.toLowerCase()) ||
+      (message.toLowerCase().trim() === 'yes' && completedOrder)
     const isReviewIntent = reviewTriggers.some(trigger => message.toLowerCase().includes(trigger.toLowerCase()))
     const isCartIntent = cartTriggers.some(trigger => message.toLowerCase().includes(trigger.toLowerCase()))
     const isCheckoutIntent = checkoutTriggers.some(trigger => message.toLowerCase().includes(trigger.toLowerCase()))
-    
+
     if (isPaymentIntent && completedOrder) {
       console.log('Payment intent detected, showing payment form for order:', completedOrder)
       setShowPaymentForm(true)
       return
     }
-    
+
     if (isReviewIntent) {
       console.log('Review intent detected, showing review form')
       setShowReviewForm(true)
       return
     }
-    
+
     if (isCartIntent) {
       showCart()
       return
     }
-    
+
     if (isCheckoutIntent) {
       if (cartItems.length === 0) {
         addMessage('Your cart is empty! Add some products first before checking out.', false)
         return
       }
-      
+
       // Use original order form for both single and multiple items
       // For multiple items, we'll create a combined product representation
       if (cartItems.length === 1) {
@@ -398,7 +402,7 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
         // Multiple items - create a combined order form
         const totalPrice = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
         const itemNames = cartItems.map(item => `${item.name} (${item.quantity}x)`).join(', ')
-        
+
         const product: Product = {
           id: 'multi-item',
           name: `Multiple Items (${cartItems.length} products)`,
@@ -412,31 +416,28 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
         return
       }
     }
-    
+
     showTypingIndicator()
     try {
       const response = await sendToCloudflareWorker(message)
-      
+
       // Check if the response contains a client-side action (from AI function calling)
       try {
         const actionData = JSON.parse(response)
         if (actionData.action === 'add_to_cart') {
-          addToCart(actionData.product_name, actionData.quantity || 1)
+          addToCart(actionData.product_name, actionData.quantity || 1, actionData.size, actionData.color)
           addMessage(actionData.message || `✅ Added ${actionData.product_name} to your cart! Say "cart" to view or "checkout" to order.`)
           return
         } else if (actionData.action === 'view_cart') {
           showCart()
           return
-        } else if (actionData.action === 'error') {
-          addMessage(actionData.message)
-          return
         }
       } catch (parseError) {
         // Not a JSON action, continue with normal response handling
       }
-      
+
       addMessage(response)
-      
+
     } catch (error) {
       console.error('Chat error:', error)
       addMessage('❌ Sorry, I encountered an error. Please try again.')
@@ -463,8 +464,8 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
   // Helper function to get product name for payment description
   const getProductName = (orderData: OrderData) => {
     if (orderData.items && orderData.items.length > 0) {
-      return orderData.items.length === 1 
-        ? orderData.items[0].product_name 
+      return orderData.items.length === 1
+        ? orderData.items[0].product_name
         : `${orderData.items.length} items`
     }
     return orderData.product_name
@@ -473,13 +474,13 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
   const handleOrderSubmit = async (orderData: OrderData) => {
     setShowOrderForm(false)
     setOrderProduct(null)
-    
+
     addMessage('Processing your order...', false)
-    
+
     showTypingIndicator()
     try {
       let payload
-      
+
       if (cartItems.length === 1) {
         // Single item order - use existing format
         payload = {
@@ -496,7 +497,7 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
           unit_price: cartItems.find(cartItem => cartItem.name === item.product_name)?.price || 0,
           total_price: (cartItems.find(cartItem => cartItem.name === item.product_name)?.price || 0) * item.quantity
         })) || []
-        
+
         payload = {
           order_type: 'multi_item',
           items: items,
@@ -509,7 +510,7 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
           timestamp: new Date().toISOString()
         }
       }
-      
+
       const response = await fetch('/api/place-order', {
         method: 'POST',
         headers: {
@@ -517,16 +518,16 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
         },
         body: JSON.stringify(payload)
       })
-      
+
       const result = await response.json()
-      
+
       if (result.success) {
         // Clear the entire cart after successful order
         setCartItems([])
-        
+
         // Extract order number from the response text using multiple methods
         let extractedOrderNumber = `ORDER-${Date.now()}` // fallback
-        
+
         // Try to extract from result.order.response (main response text)
         if (result.order?.response) {
           // Try multiple regex patterns to be more robust
@@ -535,7 +536,7 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
             /ORD-[A-Z0-9-]+/,
             /Order:\s*(ORD-[A-Z0-9-]+)/i
           ]
-          
+
           for (const pattern of patterns) {
             const match = result.order.response.match(pattern)
             if (match) {
@@ -544,14 +545,14 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
             }
           }
         }
-        
+
         // Also try to extract from the main response field if available
         if (extractedOrderNumber.startsWith('ORDER-') && result.response) {
           const patterns = [
             /Order Number: (ORD-[A-Z0-9-]+)/,
             /ORD-[A-Z0-9-]+/
           ]
-          
+
           for (const pattern of patterns) {
             const match = result.response.match(pattern)
             if (match) {
@@ -560,7 +561,7 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
             }
           }
         }
-        
+
         // Format the order data properly for PaymentForm
         const formattedOrder = {
           ...result.order,
@@ -570,10 +571,10 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
           product_name: getProductName(orderData),
           order_number: extractedOrderNumber
         }
-        
+
         setCompletedOrder(formattedOrder)
         addMessage(result.response || 'Order placed successfully! Opening payment form...', false)
-        
+
         // Automatically show payment form after successful order
         setTimeout(() => {
           setShowPaymentForm(true)
@@ -581,7 +582,7 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
       } else {
         addMessage(result.response || result.error || 'There was an issue placing your order. Please try again.', false)
       }
-      
+
     } catch (error) {
       console.error('Order error:', error)
       addMessage('❌ Sorry, there was an error placing your order. Please try again or contact support.')
@@ -599,9 +600,9 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
   const handlePaymentSubmit = async (paymentData: PaymentData) => {
     setShowPaymentForm(false)
     setCompletedOrder(null)
-    
+
     addMessage('Processing payment...', false)
-    
+
     showTypingIndicator()
     try {
       const response = await fetch('/api/process-payment', {
@@ -611,12 +612,12 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
         },
         body: JSON.stringify(paymentData)
       })
-      
+
       const result = await response.json()
-      
+
       // Show the response message regardless of success/failure
       addMessage(result.response || 'Payment processed!')
-      
+
     } catch (error) {
       console.error('Payment error:', error)
       addMessage('❌ Sorry, there was an error processing your payment. Please try again or contact support.')
@@ -633,9 +634,9 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
 
   const handleReviewSubmit = async (reviewData: ReviewData) => {
     setShowReviewForm(false)
-    
+
     addMessage('Submitting your review...', false)
-    
+
     showTypingIndicator()
     try {
       const response = await fetch('/api/submit-review', {
@@ -645,12 +646,12 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
         },
         body: JSON.stringify(reviewData)
       })
-      
+
       const result = await response.json()
-      
+
       // Show the response message regardless of success/failure
       addMessage(result.response || 'Review submitted successfully!')
-      
+
     } catch (error) {
       console.error('Review error:', error)
       addMessage('❌ Sorry, there was an error submitting your review. Please try again or contact support.')
@@ -667,7 +668,7 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
   const handleProductClick = useCallback(async (product: Product) => {
     const message = `I'm interested in the ${product.name}`
     await handleUserMessage(message)
-    
+
     if (onProductSelect) {
       onProductSelect(product)
     }
@@ -711,10 +712,10 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
       <div className="flex items-center justify-between px-6 py-4 border-b border-[#2A2A2A] bg-[#0F0F0F]">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 flex items-center justify-center">
-            <img 
-              src="/logo.svg" 
-              alt="Checkoutly Logo" 
-              width={24} 
+            <img
+              src="/logo.svg"
+              alt="Checkoutly Logo"
+              width={24}
               height={24}
               className="object-contain"
             />
@@ -724,7 +725,7 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
             <div className="text-xs text-[#10B981]">Online & Ready</div>
           </div>
         </div>
-        
+
         {/* Real-time Stats (B2B Appeal) */}
         <div className="hidden md:flex items-center gap-4 text-xs font-mono">
           <div className="flex items-center gap-1">
@@ -736,16 +737,16 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
             <span className="text-[#6B6B6B]">99.9% Uptime</span>
           </div>
         </div>
-        
+
         {itemCount > 0 && (
           <button
             onClick={showCart}
             className="flex items-center gap-2 px-4 py-2 bg-[#1A1A1A] rounded-lg border border-[#2A2A2A] hover:border-[#00E5FF] transition-all duration-300"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="9" cy="21" r="1"/>
-              <circle cx="20" cy="21" r="1"/>
-              <path d="m1 1 4 4 2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+              <circle cx="9" cy="21" r="1" />
+              <circle cx="20" cy="21" r="1" />
+              <path d="m1 1 4 4 2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
             </svg>
             <span className="font-mono text-sm text-white">
               {itemCount} {itemCount === 1 ? 'item' : 'items'} · ${cartTotal.toFixed(2)}
@@ -755,7 +756,7 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
       </div>
 
       {/* Messages Area */}
-      <div 
+      <div
         className="flex-1 overflow-y-auto p-6 space-y-4 relative"
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -776,7 +777,7 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
             {/* Elegant border */}
             <div className="absolute inset-4 border-2 border-dashed border-[#00E5FF]/60 rounded-2xl"></div>
             <div className="absolute inset-6 border border-[#00E5FF]/20 rounded-xl"></div>
-            
+
             {/* Content */}
             <div className="text-center relative z-10">
               {/* Icon with subtle glow */}
@@ -785,7 +786,7 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
                   📦
                 </div>
               </div>
-              
+
               {/* Stable text with subtle glow */}
               <div className="relative">
                 <div className="text-2xl font-bold text-[#00E5FF] mb-2 filter drop-shadow-[0_0_8px_rgba(0,229,255,0.4)]">
@@ -796,7 +797,7 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
                 </div>
               </div>
             </div>
-            
+
             {/* Subtle ripple effect */}
             <div className="absolute inset-0 rounded-2xl">
               <div className="absolute inset-0 bg-[#00E5FF]/2 rounded-2xl animate-ping opacity-30"></div>
@@ -870,16 +871,16 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
             Send
           </button>
         </div>
-        
+
         {/* Clean Quick Actions */}
         <div className="flex gap-2 mt-3 overflow-x-auto pb-1">
-          <button 
+          <button
             onClick={showCart}
             className="flex-shrink-0 text-xs px-3 py-1.5 bg-[#1A1A1A] text-[#B0B0B0] rounded border border-[#2A2A2A] hover:border-[#00E5FF] hover:text-white transition-all duration-300"
           >
             Cart
           </button>
-          <button 
+          <button
             onClick={() => setShowReviewForm(true)}
             className="flex-shrink-0 text-xs px-3 py-1.5 bg-[#1A1A1A] text-[#B0B0B0] rounded border border-[#2A2A2A] hover:border-[#00E5FF] hover:text-white transition-all duration-300"
           >
@@ -890,6 +891,69 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
     </div>
   )
 }
+
+// Helper to render rich content (bold text and embedded product cards)
+const RichMessageContent = ({ content, addToCart, handleProductDetails }: {
+  content: string,
+  addToCart: (productName: string, quantity?: number) => Promise<void>,
+  handleProductDetails: (product: Product) => void
+}) => {
+  // Regex to match [PRODUCT:JSON_DATA] or **bold text**
+  const combinedRegex = /\[PRODUCT:(\{.*?\})\]|\*\*(.*?)\*\*/g;
+  const parts = [];
+  let lastIndex = 0;
+  let match;
+
+  while ((match = combinedRegex.exec(content)) !== null) {
+    // Add text before the match
+    if (match.index > lastIndex) {
+      parts.push({ type: 'text', value: content.slice(lastIndex, match.index) });
+    }
+
+    if (match[1]) {
+      // It's a product card
+      try {
+        const productData = JSON.parse(match[1]);
+        parts.push({ type: 'product', value: productData });
+      } catch (e) {
+        parts.push({ type: 'text', value: match[0] });
+      }
+    } else if (match[2]) {
+      // It's bold text
+      parts.push({ type: 'bold', value: match[2] });
+    }
+
+    lastIndex = combinedRegex.lastIndex;
+  }
+
+  // Add remaining text
+  if (lastIndex < content.length) {
+    parts.push({ type: 'text', value: content.slice(lastIndex) });
+  }
+
+  if (parts.length === 0) return <>{content}</>;
+
+  return (
+    <div className="space-y-3">
+      {parts.map((part, i) => {
+        if (part.type === 'bold') {
+          return <strong key={i} className="font-bold text-[#00E5FF]">{part.value}</strong>;
+        } else if (part.type === 'product') {
+          return (
+            <div key={i} className="my-2">
+              <InlineProductCard
+                product={part.value}
+                onAddToCart={addToCart}
+                onViewDetails={handleProductDetails}
+              />
+            </div>
+          );
+        }
+        return <span key={i} className="whitespace-pre-wrap">{part.value}</span>;
+      })}
+    </div>
+  );
+};
 
 // Memoized message component for better performance
 const MessageItem = memo(function MessageItem({ message, addToCart, handleProductDetails }: {
@@ -902,20 +966,20 @@ const MessageItem = memo(function MessageItem({ message, addToCart, handleProduc
       key={message.id}
       className={`flex ${message.isUser ? 'justify-end' : 'justify-start'} animate-[slideIn_300ms_ease-out]`}
     >
-      <div className={`max-w-[80%] ${message.isUser ? 'order-2' : 'order-1'}`}>
+      <div className={`max-w-[85%] ${message.isUser ? 'order-2' : 'order-1'}`}>
         {!message.isUser && (
           <div className="text-xs text-[#6B6B6B] mb-1 flex items-center gap-2">
-            <img 
-              src="/logo.svg" 
-              alt="Checkoutly Logo" 
-              width={16} 
+            <img
+              src="/logo.svg"
+              alt="Checkoutly Logo"
+              width={16}
               height={16}
               className="object-contain"
             />
             Checkoutly AI
           </div>
         )}
-        
+
         {/* Check if this is a product card message */}
         {message.content.startsWith('PRODUCT_CARD:') ? (
           <InlineProductCard
@@ -925,16 +989,23 @@ const MessageItem = memo(function MessageItem({ message, addToCart, handleProduc
           />
         ) : (
           <div
-            className={`px-4 py-3 rounded-2xl ${
-              message.isUser
-                ? 'bg-[#00E5FF] text-black'
-                : 'bg-[#1A1A1A] text-white border border-[#2A2A2A]'
-            }`}
+            className={`px-4 py-3 rounded-2xl ${message.isUser
+              ? 'bg-[#00E5FF] text-black shadow-[0_0_20px_rgba(0,229,255,0.2)]'
+              : 'bg-[#1A1A1A] text-white border border-[#2A2A2A]'
+              }`}
           >
-            {message.content}
+            {message.isUser ? (
+              message.content
+            ) : (
+              <RichMessageContent
+                content={message.content}
+                addToCart={addToCart}
+                handleProductDetails={handleProductDetails}
+              />
+            )}
           </div>
         )}
-        
+
         <div className="text-xs text-[#6B6B6B] mt-1">
           {formatTime(message.timestamp)}
         </div>

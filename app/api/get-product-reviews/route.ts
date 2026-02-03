@@ -9,8 +9,8 @@ const ordersSupabase = createClient(
 
 // Reviews database (where we get approved reviews)
 const reviewsSupabase = createClient(
-  'https://exqdqnhqcockmqynpiew.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4cWRxbmhxY29ja21xeW5waWV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1NTQ3ODMsImV4cCI6MjA4NTEzMDc4M30.7hwhxFPUTyFPCqzrMJlJnOI8B7VbPXNT5kLPihlStRg'
+  'https://pwxwproyyiyqjezqkeoe.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3eHdwcm95eWl5cWplenFrZW9lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk2MDc3NjksImV4cCI6MjA4NTE4Mzc2OX0.k99dnjnENt2biwEwsAl_I78g6-gZKG7NIGPDUh622_4'
 )
 
 export async function GET(request: NextRequest) {
@@ -72,7 +72,7 @@ export async function GET(request: NextRequest) {
 
         // Check if this order contains the product we're looking for
         const items = orderData.items as any[]
-        const hasProduct = items.some(item => 
+        const hasProduct = items.some(item =>
           item.product_name && item.product_name.toLowerCase() === productName.toLowerCase()
         )
 
@@ -95,8 +95,8 @@ export async function GET(request: NextRequest) {
 
     // 3. Calculate statistics
     const totalReviews = productReviews.length
-    const averageRating = totalReviews > 0 
-      ? productReviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews 
+    const averageRating = totalReviews > 0
+      ? productReviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews
       : 0
 
     const ratingDistribution = {
