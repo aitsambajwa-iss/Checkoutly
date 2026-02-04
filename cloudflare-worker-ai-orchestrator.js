@@ -144,10 +144,12 @@ AVAILABLE FUNCTIONS:
 - view_cart: for viewing cart contents
 
 RULES:
-- Be a proactive salesperson. If a user asks for "shoes", search the inventory and suggest a few.
-- If user gives specific requirements (e.g., "size 42"), use search_inventory.
+- Be a proactive salesperson. If a user asks for generic categories ("shoes", "clothes", "gear"), ALWAYS use \`search_inventory\`.
+- If user gives specific requirements (e.g., "size 42"), use \`search_inventory\`.
+- **Search Strategy**: When calling \`search_inventory\`, use 1-2 high-impact, singular keywords (e.g., "gym" instead of "gym shoes", "run" instead of "running") for broader matching.
+- **Plurality Note**: Our inventory descriptions often use singular terms. Strip trailing 's' from keywords when searching (e.g., use "shoe" instead of "shoes").
 - When user says they want to "buy" or "add" something, you MUST check if you have the **size** and **color**. If the user hasn't specified them, ASK for them before calling add_to_cart.
-- Use the EXACT product name from the conversation when calling tools.
+- Use the EXACT product name from the tool output when calling add_to_cart.
 - Keep your language polished and helpful.
 
 SIZE CONVERSION KNOWLEDGE:
@@ -229,13 +231,13 @@ YOU MUST CALL A FUNCTION. DO NOT return text like "Call search_inventory". ACTUA
           },
           {
             name: 'search_inventory',
-            description: 'Search for products based on specific features like size, color, price, or description. Use this for recommendations or specific customer requests.',
+            description: 'Search for categories or features (e.g., "gym shoes", "red hiking boots"). Use this for recommendations or when user describes what they are looking for.',
             parameters: {
               type: 'object',
               properties: {
                 query: {
                   type: 'string',
-                  description: 'Search term for name or description (e.g., "running", "classic")'
+                  description: 'Search term for name or description (e.g., "gym", "leather", "running"). Provide only 1-2 concise keywords for best results.'
                 },
                 size: {
                   type: 'string',
@@ -484,8 +486,20 @@ async function searchInventory(args, env) {
   params.append('select', '*');
 
   // PostgREST filters
+  // Multi-word keyword search for better discovery
   if (query) {
-    params.append('or', `(name.ilike.%${query}%,description.ilike.%${query}%)`);
+    // Basic singularization: strip 's' or 'es' for better fuzzy matching against "shoe" or "box"
+    const keywords = query.split(/\s+/)
+      .map(word => word.toLowerCase().replace(/e?s$/, ''))
+      .filter(word => word.length >= 3);
+
+    if (keywords.length > 0) {
+      // PostgREST: and=(or(name.ilike.%swimming%,description.ilike.%swimming%),or(name.ilike.%suit%,description.ilike.%suit%))
+      const andPart = keywords.map(kw => `or(name.ilike.%${kw}%,description.ilike.%${kw}%)`).join(',');
+      params.append('and', `(${andPart})`);
+    } else {
+      params.append('or', `(name.ilike.%${query}%,description.ilike.%${query}%)`);
+    }
   }
 
   if (size) {
