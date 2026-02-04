@@ -8,6 +8,9 @@ export const metadata: Metadata = {
     title: 'Checkoutly - Commerce, Reimagined Through Chat',
     description: 'Transform your business with AI-powered chatbots that handle orders, payments, and reviews',
   },
+  icons: {
+    icon: '/logo.svg',
+  },
 }
 
 export default function RootLayout({
