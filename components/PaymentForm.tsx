@@ -83,7 +83,7 @@ export default function PaymentForm({ orderData, onSubmit, onCancel }: PaymentFo
     } else {
       setFormData(prev => ({ ...prev, [field]: value }))
     }
-    
+
     // Clear error when user starts typing
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }))
@@ -176,98 +176,98 @@ export default function PaymentForm({ orderData, onSubmit, onCancel }: PaymentFo
       case 'card.number':
         return (
           <div key={field} className="mb-3">
-            <label className="block text-xs font-medium text-white mb-1">Card Number</label>
+            <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Card Number</label>
             <input
               type="text"
               value={formatCardNumber(formData.card.number)}
               onChange={(e) => handleInputChange('card.number', e.target.value.replace(/\s/g, ''))}
               placeholder="1234 5678 9012 3456"
               maxLength={19}
-              className="w-full bg-[var(--bg-elevated)] border border-[var(--bg-elevated)] rounded-lg px-2 py-1.5 text-white focus:outline-none focus:border-[var(--accent)] font-mono text-sm"
+              className="w-full bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-lg px-2 py-1.5 text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)] font-mono text-sm placeholder:text-[var(--text-muted)]"
             />
-            {error && <p className="text-red-400 text-xs mt-1">{error}</p>}
+            {error && <p className="text-[var(--error)] text-xs mt-1">{error}</p>}
           </div>
         )
 
       case 'card.exp_month':
         return (
           <div key={field} className="mb-3">
-            <label className="block text-xs font-medium text-white mb-1">Month</label>
+            <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Month</label>
             <select
               value={formData.card.exp_month}
               onChange={(e) => handleInputChange('card.exp_month', parseInt(e.target.value))}
-              className="w-full bg-[var(--bg-elevated)] border border-[var(--bg-elevated)] rounded-lg px-2 py-1.5 text-white focus:outline-none focus:border-[var(--accent)] text-sm"
+              className="w-full bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-lg px-2 py-1.5 text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)] text-sm appearance-none"
             >
               {Array.from({ length: 12 }, (_, i) => i + 1).map(month => (
-                <option key={month} value={month}>
+                <option key={month} value={month} className="bg-[var(--bg-elevated)]">
                   {month.toString().padStart(2, '0')}
                 </option>
               ))}
             </select>
-            {error && <p className="text-red-400 text-xs mt-1">{error}</p>}
+            {error && <p className="text-[var(--error)] text-xs mt-1">{error}</p>}
           </div>
         )
 
       case 'card.exp_year':
         return (
           <div key={field} className="mb-3">
-            <label className="block text-xs font-medium text-white mb-1">Year</label>
+            <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Year</label>
             <select
               value={formData.card.exp_year}
               onChange={(e) => handleInputChange('card.exp_year', parseInt(e.target.value))}
-              className="w-full bg-[var(--bg-elevated)] border border-[var(--bg-elevated)] rounded-lg px-2 py-1.5 text-white focus:outline-none focus:border-[var(--accent)] text-sm"
+              className="w-full bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-lg px-2 py-1.5 text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)] text-sm appearance-none"
             >
               {Array.from({ length: 10 }, (_, i) => getCurrentYear() + i).map(year => (
-                <option key={year} value={year}>{year}</option>
+                <option key={year} value={year} className="bg-[var(--bg-elevated)]">{year}</option>
               ))}
             </select>
-            {error && <p className="text-red-400 text-xs mt-1">{error}</p>}
+            {error && <p className="text-[var(--error)] text-xs mt-1">{error}</p>}
           </div>
         )
 
       case 'card.cvc':
         return (
           <div key={field} className="mb-3">
-            <label className="block text-xs font-medium text-white mb-1">CVC</label>
+            <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">CVC</label>
             <input
               type="text"
               value={formData.card.cvc}
               onChange={(e) => handleInputChange('card.cvc', e.target.value.replace(/\D/g, ''))}
               placeholder="123"
               maxLength={4}
-              className="w-full bg-[var(--bg-elevated)] border border-[var(--bg-elevated)] rounded-lg px-2 py-1.5 text-white focus:outline-none focus:border-[var(--accent)] font-mono text-sm"
+              className="w-full bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-lg px-2 py-1.5 text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)] font-mono text-sm placeholder:text-[var(--text-muted)]"
             />
-            {error && <p className="text-red-400 text-xs mt-1">{error}</p>}
+            {error && <p className="text-[var(--error)] text-xs mt-1">{error}</p>}
           </div>
         )
 
       case 'name':
         return (
           <div key={field} className="mb-3">
-            <label className="block text-xs font-medium text-white mb-1">Cardholder Name</label>
+            <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Cardholder Name</label>
             <input
               type="text"
               value={formData.name}
               onChange={(e) => handleInputChange('name', e.target.value)}
               placeholder="John Doe"
-              className="w-full bg-[var(--bg-elevated)] border border-[var(--bg-elevated)] rounded-lg px-2 py-1.5 text-white focus:outline-none focus:border-[var(--accent)] text-sm"
+              className="w-full bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-lg px-2 py-1.5 text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)] text-sm placeholder:text-[var(--text-muted)]"
             />
-            {error && <p className="text-red-400 text-xs mt-1">{error}</p>}
+            {error && <p className="text-[var(--error)] text-xs mt-1">{error}</p>}
           </div>
         )
 
       case 'email':
         return (
           <div key={field} className="mb-3">
-            <label className="block text-xs font-medium text-white mb-1">Email Address</label>
+            <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Email Address</label>
             <input
               type="email"
               value={formData.email}
               onChange={(e) => handleInputChange('email', e.target.value)}
               placeholder="john@example.com"
-              className="w-full bg-[var(--bg-elevated)] border border-[var(--bg-elevated)] rounded-lg px-2 py-1.5 text-white focus:outline-none focus:border-[var(--accent)] text-sm"
+              className="w-full bg-[var(--bg-elevated)] border border-[var(--border-subtle)] rounded-lg px-2 py-1.5 text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)] text-sm placeholder:text-[var(--text-muted)]"
             />
-            {error && <p className="text-red-400 text-xs mt-1">{error}</p>}
+            {error && <p className="text-[var(--error)] text-xs mt-1">{error}</p>}
           </div>
         )
 
@@ -282,7 +282,7 @@ export default function PaymentForm({ orderData, onSubmit, onCancel }: PaymentFo
     <div className="bg-[var(--bg-elevated)] rounded-xl p-3 my-2 border border-[var(--accent)]/20 flex flex-col">
       {/* Payment Summary - Compact */}
       <div className="mb-3 pb-2 border-b border-[var(--bg-elevated)]">
-        <h3 className="text-base font-semibold text-white mb-1">💳 Payment Details</h3>
+        <h3 className="text-base font-display font-medium text-white mb-1">💳 Payment Details</h3>
         <p className="text-xs text-[var(--text-muted)]">Order: {orderData.order_number}</p>
         <p className="text-[var(--accent)] font-semibold mt-1 text-sm">
           Total: ${(orderData.order_total || orderData.total || 0).toFixed(2)}
@@ -293,17 +293,15 @@ export default function PaymentForm({ orderData, onSubmit, onCancel }: PaymentFo
       <div className="flex items-center justify-between mb-3">
         {steps.map((step, index) => (
           <div key={index} className="flex items-center">
-            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
-              index <= currentStep 
-                ? 'bg-[var(--accent)] text-[#0A0A0A]' 
-                : 'bg-[var(--bg-elevated)] text-[var(--text-muted)]'
-            }`}>
+            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${index <= currentStep
+              ? 'bg-[var(--accent)] text-[#0A0A0A]'
+              : 'bg-[var(--bg-elevated)] text-[var(--text-muted)]'
+              }`}>
               {index + 1}
             </div>
             {index < steps.length - 1 && (
-              <div className={`w-8 h-0.5 mx-1 ${
-                index < currentStep ? 'bg-[var(--accent)]' : 'bg-[var(--bg-elevated)]'
-              }`} />
+              <div className={`w-8 h-0.5 mx-1 ${index < currentStep ? 'bg-[var(--accent)]' : 'bg-[var(--bg-elevated)]'
+                }`} />
             )}
           </div>
         ))}
@@ -311,8 +309,8 @@ export default function PaymentForm({ orderData, onSubmit, onCancel }: PaymentFo
 
       {/* Current Step */}
       <div className="flex-1 mb-3">
-        <h4 className="text-sm font-medium text-white mb-2">{currentStepData.title}</h4>
-        
+        <h4 className="text-sm font-display font-medium text-white mb-2">{currentStepData.title}</h4>
+
         {currentStep === 0 && (
           <div className="space-y-3">
             {renderField('card.number')}
@@ -323,7 +321,7 @@ export default function PaymentForm({ orderData, onSubmit, onCancel }: PaymentFo
             {renderField('card.cvc')}
           </div>
         )}
-        
+
         {currentStep === 1 && (
           <div className="space-y-3">
             {renderField('name')}

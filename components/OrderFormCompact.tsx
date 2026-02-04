@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Price from './Price'
 
 interface Product {
   name: string
@@ -80,14 +81,14 @@ export default function OrderFormCompact({ product, cartItems, onSubmit, onCance
   }
 
   return (
-    <div className="bg-[#0F0F0F] border-2 border-[#00E5FF] rounded-xl p-4 flex flex-col">
+    <div className="bg-[var(--bg-tertiary)] border-2 border-[var(--accent)] rounded-xl p-4 flex flex-col shadow-2xl">
       {/* Progress Header - More Compact */}
       <div className="mb-3">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs font-mono text-[#B0B0B0]">
+          <span className="text-xs font-mono text-[var(--text-secondary)]">
             Step {step} of {totalSteps}
           </span>
-          <span className="text-xs text-[#6B6B6B]">
+          <span className="text-xs text-[var(--text-muted)]">
             {step === 1 ? 'Product Details' : step === 2 ? 'Your Info' : 'Shipping'}
           </span>
         </div>
@@ -95,7 +96,7 @@ export default function OrderFormCompact({ product, cartItems, onSubmit, onCance
           {Array.from({ length: totalSteps }).map((_, i) => (
             <div
               key={i}
-              className={`h-1 flex-1 rounded-full transition-all duration-300 ${i < step ? 'bg-[#00E5FF]' : 'bg-[#2A2A2A]'
+              className={`h-1 flex-1 rounded-full transition-all duration-300 ${i < step ? 'bg-[var(--accent)]' : 'bg-[var(--border-subtle)]'
                 }`}
             />
           ))}
@@ -109,17 +110,17 @@ export default function OrderFormCompact({ product, cartItems, onSubmit, onCance
             {!isMultiItem ? (
               <div className="space-y-3">
                 <div className="p-3 bg-[#1A1A1A] rounded-lg border border-[#2A2A2A]">
-                  <div className="text-sm font-semibold text-white">{product.name}</div>
-                  <div className="text-base font-mono text-[#00E5FF] mt-1">${product.price.toFixed(2)}</div>
+                  <div className="text-sm font-display font-medium text-white">{product.name}</div>
+                  <Price amount={product.price} size="md" className="mt-1" />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs text-[#B0B0B0] mb-1.5 block uppercase tracking-wider font-semibold">Size</label>
+                    <label className="text-xs text-[#B0B0B0] mb-1.5 block uppercase tracking-wider font-display font-medium">Size</label>
                     <select
                       value={formData.size}
                       onChange={(e) => handleInputChange('size', e.target.value)}
-                      className="w-full px-3 py-2 bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg text-white text-sm focus:border-[#00E5FF] focus:outline-none transition-all"
+                      className="w-full px-3 py-2 bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg text-white text-sm focus:border-[#FFFFFF] focus:outline-none transition-all"
                     >
                       <option value="">Select Size</option>
                       {product.sizes?.map(size => (
@@ -129,7 +130,7 @@ export default function OrderFormCompact({ product, cartItems, onSubmit, onCance
                   </div>
 
                   <div>
-                    <label className="text-xs text-[#B0B0B0] mb-1.5 block uppercase tracking-wider font-semibold">Color</label>
+                    <label className="text-xs text-[#B0B0B0] mb-1.5 block uppercase tracking-wider font-display font-medium">Color</label>
                     <select
                       value={formData.color}
                       onChange={(e) => handleInputChange('color', e.target.value)}
@@ -144,12 +145,12 @@ export default function OrderFormCompact({ product, cartItems, onSubmit, onCance
                 </div>
 
                 <div>
-                  <label className="text-xs text-[#B0B0B0] mb-1.5 block uppercase tracking-wider font-semibold">Quantity</label>
+                  <label className="text-xs text-[#B0B0B0] mb-1.5 block uppercase tracking-wider font-display font-medium">Quantity</label>
                   <div className="flex items-center gap-3">
                     <button
                       type="button"
                       onClick={() => handleInputChange('quantity', Math.max(1, formData.quantity - 1))}
-                      className="w-10 h-10 flex items-center justify-center bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg hover:border-[#00E5FF] transition-all text-white"
+                      className="w-10 h-10 flex items-center justify-center bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg hover:border-[#FFFFFF] transition-all text-white"
                     >
                       <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M5 12h14" /></svg>
                     </button>
@@ -166,7 +167,7 @@ export default function OrderFormCompact({ product, cartItems, onSubmit, onCance
               </div>
             ) : (
               <div className="space-y-4">
-                <div className="text-sm font-semibold text-[#00E5FF] bg-[#00E5FF]/10 px-3 py-2 rounded-lg border border-[#00E5FF]/20">
+                <div className="text-sm font-semibold text-white bg-white/5 px-3 py-2 rounded-lg border border-white/10">
                   Select options for each item in your cart ({cartItems?.length} items)
                 </div>
                 {formData.items?.map((item, index) => {
@@ -174,8 +175,11 @@ export default function OrderFormCompact({ product, cartItems, onSubmit, onCance
                   return (
                     <div key={index} className="p-3 bg-[#1A1A1A] rounded-lg border border-[#2A2A2A] space-y-3">
                       <div className="flex justify-between items-start">
-                        <div className="text-sm font-semibold text-white">{item.product_name}</div>
-                        <div className="text-xs font-mono text-[#00E5FF]">${(productInCart?.price || 0).toFixed(2)} x {item.quantity}</div>
+                        <div className="text-sm font-display font-medium text-white">{item.product_name}</div>
+                        <div className="text-xs text-white">
+                          <Price amount={productInCart?.price || 0} size="sm" className="inline-flex" />
+                          <span className="ml-1">x {item.quantity}</span>
+                        </div>
                       </div>
                       <div className="grid grid-cols-2 gap-2">
                         <div>
@@ -187,7 +191,7 @@ export default function OrderFormCompact({ product, cartItems, onSubmit, onCance
                               newItems[index].size = e.target.value;
                               setFormData(prev => ({ ...prev, items: newItems }));
                             }}
-                            className="w-full px-2 py-1.5 bg-[#0F0F0F] border border-[#2A2A2A] rounded text-white text-xs focus:border-[#00E5FF] focus:outline-none"
+                            className="w-full px-2 py-1.5 bg-[#0F0F0F] border border-[#2A2A2A] rounded text-white text-xs focus:border-[#FFFFFF] focus:outline-none"
                           >
                             <option value="">Select</option>
                             {productInCart?.sizes?.map(s => (
@@ -204,7 +208,7 @@ export default function OrderFormCompact({ product, cartItems, onSubmit, onCance
                               newItems[index].color = e.target.value;
                               setFormData(prev => ({ ...prev, items: newItems }));
                             }}
-                            className="w-full px-2 py-1.5 bg-[#0F0F0F] border border-[#2A2A2A] rounded text-white text-xs focus:border-[#00E5FF] focus:outline-none"
+                            className="w-full px-2 py-1.5 bg-[#0F0F0F] border border-[#2A2A2A] rounded text-white text-xs focus:border-[#FFFFFF] focus:outline-none"
                           >
                             <option value="">Select</option>
                             {productInCart?.colors?.map(c => (
@@ -224,34 +228,34 @@ export default function OrderFormCompact({ product, cartItems, onSubmit, onCance
         {step === 2 && (
           <div className="space-y-4">
             <div>
-              <label className="text-xs text-[#B0B0B0] mb-1.5 block uppercase tracking-wider font-semibold">Full Name</label>
+              <label className="text-xs text-[#B0B0B0] mb-1.5 block uppercase tracking-wider font-display font-medium">Full Name</label>
               <input
                 type="text"
                 value={formData.customer_name}
                 onChange={(e) => handleInputChange('customer_name', e.target.value)}
-                className="w-full px-3 py-2 bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg text-white text-sm focus:border-[#00E5FF] focus:outline-none placeholder-[#333]"
+                className="w-full px-3 py-2 bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg text-white text-sm focus:border-[#FFFFFF] focus:outline-none resize-none placeholder-[#333]"
                 placeholder="John Doe"
               />
             </div>
 
             <div>
-              <label className="text-xs text-[#B0B0B0] mb-1.5 block uppercase tracking-wider font-semibold">Email Address</label>
+              <label className="text-xs text-[#B0B0B0] mb-1.5 block uppercase tracking-wider font-display font-medium">Email Address</label>
               <input
                 type="email"
                 value={formData.customer_email}
                 onChange={(e) => handleInputChange('customer_email', e.target.value)}
-                className="w-full px-3 py-2 bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg text-white text-sm focus:border-[#00E5FF] focus:outline-none placeholder-[#333]"
+                className="w-full px-3 py-2 bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg text-white text-sm focus:border-[#FFFFFF] focus:outline-none resize-none placeholder-[#333]"
                 placeholder="john@example.com"
               />
             </div>
 
             <div>
-              <label className="text-xs text-[#B0B0B0] mb-1.5 block uppercase tracking-wider font-semibold">Phone Number</label>
+              <label className="text-xs text-[#B0B0B0] mb-1.5 block uppercase tracking-wider font-display font-medium">Phone Number</label>
               <input
                 type="tel"
                 value={formData.customer_phone}
                 onChange={(e) => handleInputChange('customer_phone', e.target.value)}
-                className="w-full px-3 py-2 bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg text-white text-sm focus:border-[#00E5FF] focus:outline-none placeholder-[#333]"
+                className="w-full px-3 py-2 bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg text-white text-sm focus:border-[#FFFFFF] focus:outline-none resize-none placeholder-[#333]"
                 placeholder="+1 (555) 000-0000"
               />
             </div>
@@ -261,7 +265,7 @@ export default function OrderFormCompact({ product, cartItems, onSubmit, onCance
         {step === 3 && (
           <div className="space-y-4">
             <div>
-              <label className="text-xs text-[#B0B0B0] mb-1.5 block uppercase tracking-wider font-semibold">Shipping Address</label>
+              <label className="text-xs text-[#B0B0B0] mb-1.5 block uppercase tracking-wider font-display font-medium">Shipping Address</label>
               <textarea
                 rows={3}
                 value={formData.shipping_address}
@@ -271,19 +275,19 @@ export default function OrderFormCompact({ product, cartItems, onSubmit, onCance
               />
             </div>
 
-            <div className="p-3 bg-[#1A1A1A] rounded-lg border border-[#2A2A2A]">
+            <div className="p-3 bg-[var(--bg-elevated)] rounded-lg border border-[var(--border-subtle)]">
               <div className="flex justify-between text-xs mb-2">
-                <span className="text-[#6B6B6B]">Subtotal</span>
-                <span className="text-white font-mono">${calculateTotal().toFixed(2)}</span>
+                <span className="text-[var(--text-muted)]">Subtotal</span>
+                <Price amount={calculateTotal()} size="sm" />
               </div>
               <div className="flex justify-between text-xs mb-2">
-                <span className="text-[#6B6B6B]">Estimated Shipping</span>
-                <span className="text-white font-mono">$10.00</span>
+                <span className="text-[var(--text-muted)]">Estimated Shipping</span>
+                <Price amount={10} size="sm" />
               </div>
-              <div className="border-t border-[#2A2A2A] my-2"></div>
+              <div className="border-t border-[var(--border-subtle)] my-2"></div>
               <div className="flex justify-between font-bold text-base">
-                <span className="text-white">Order Total</span>
-                <span className="text-[#00E5FF] font-mono">${(calculateTotal() + 10).toFixed(2)}</span>
+                <span className="text-[var(--text-primary)]">Order Total</span>
+                <Price amount={calculateTotal() + 10} size="md" />
               </div>
             </div>
           </div>
@@ -291,11 +295,11 @@ export default function OrderFormCompact({ product, cartItems, onSubmit, onCance
       </div>
 
       {/* Actions - Always visible at bottom */}
-      <div className="flex gap-2 mt-4 pt-4 border-t border-[#2A2A2A]">
+      <div className="flex gap-2 mt-4 pt-4 border-t border-[var(--border-subtle)]">
         {step > 1 && (
           <button
             onClick={() => setStep(step - 1)}
-            className="flex-1 px-4 py-2.5 bg-[#1A1A1A] text-[#B0B0B0] rounded-lg border border-[#2A2A2A] hover:border-[#00E5FF] hover:text-white transition-all font-semibold text-sm"
+            className="flex-1 px-4 py-2.5 bg-[var(--bg-elevated)] text-[var(--text-secondary)] rounded-lg border border-[var(--border-subtle)] hover:border-[var(--accent)] hover:text-white transition-all font-semibold text-sm"
           >
             Back
           </button>
@@ -331,14 +335,14 @@ export default function OrderFormCompact({ product, cartItems, onSubmit, onCance
 
             step < 3 ? setStep(step + 1) : handleSubmit()
           }}
-          className="flex-[2] px-4 py-2.5 bg-[#00E5FF] text-black rounded-lg hover:bg-[#00B8D4] transform hover:scale-[1.02] active:scale-[0.98] transition-all font-bold text-sm shadow-[0_0_20px_rgba(0,229,255,0.3)]"
+          className="flex-[2] px-4 py-2.5 bg-[var(--accent)] text-black rounded-lg hover:bg-[var(--accent-hover)] transform hover:scale-[1.02] active:scale-[0.98] transition-all font-bold text-sm shadow-[0_10px_30px_var(--accent-glow)]"
         >
           {step === 3 ? 'Complete Purchase' : 'Continue'}
         </button>
 
         <button
           onClick={onCancel}
-          className="px-4 py-2.5 text-[#6B6B6B] hover:text-white transition-all text-sm font-medium"
+          className="px-4 py-2.5 text-[var(--text-muted)] hover:text-white transition-all text-sm font-medium"
         >
           Cancel
         </button>

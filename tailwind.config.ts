@@ -9,14 +9,20 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        'dark-bg': '#0A0A0A',
-        'dark-surface': '#1A1A1A',
-        'dark-elevated': '#2A2A2A',
-        'accent-cyan': '#00F0FF',
+        'dark-bg': '#000000',
+        'dark-surface': '#0A0A0A',
+        'dark-card': '#0F0F0F',
+        'dark-elevated': '#1A1A1A',
+        'accent-white': '#FFFFFF',
+        'accent-offwhite': '#E5E5E5',
+        'success': '#E5E5E5',
+        'error': '#E5E5E5',
+        'warning': '#E5E5E5',
       },
       fontFamily: {
-        sans: ['var(--font-geist-sans)'],
-        mono: ['var(--font-geist-mono)'],
+        sans: ['var(--font-body)'],
+        display: ['var(--font-display)'],
+        mono: ['var(--font-mono)'],
       },
       maxWidth: {
         'container': '1400px',

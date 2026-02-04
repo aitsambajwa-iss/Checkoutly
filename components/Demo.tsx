@@ -20,6 +20,9 @@ interface CartItem {
   image_url?: string
 }
 
+import AnimatedCounter from './AnimatedCounter'
+import ScrollReveal from './ScrollReveal'
+
 export default function Demo() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [cartItems, setCartItems] = useState<CartItem[]>([])
@@ -27,7 +30,7 @@ export default function Demo() {
   const [showCheckoutModal, setShowCheckoutModal] = useState(false)
   const [showProductModal, setShowProductModal] = useState(false)
   const [modalProduct, setModalProduct] = useState<Product | null>(null)
-  
+
   // Reference to ChatWidget to trigger order form
   const chatWidgetRef = useRef<any>(null)
 
@@ -44,7 +47,7 @@ export default function Demo() {
   const handleAddToCart = (product: Product, options: { size: string; color: string; quantity: number }) => {
     // Close the product modal
     setShowProductModal(false)
-    
+
     // Add to ChatWidget's cart using the exposed function
     if ((window as any).chatWidgetAddToCart) {
       (window as any).chatWidgetAddToCart(product.name, options)
@@ -53,8 +56,8 @@ export default function Demo() {
 
   // Cart management functions (for the separate cart system if needed)
   const updateCartQuantity = (itemId: string, quantity: number) => {
-    setCartItems(prev => 
-      prev.map(item => 
+    setCartItems(prev =>
+      prev.map(item =>
         item.id === itemId ? { ...item, quantity } : item
       )
     )
@@ -127,46 +130,46 @@ export default function Demo() {
           {/* B2B-Focused Header */}
           <div className="text-center mb-16">
             {/* Live Demo Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#00E5FF]/10 border border-[#00E5FF]/30 rounded-full mb-6">
-              <div className="w-2 h-2 rounded-full bg-[#00E5FF] animate-pulse"></div>
-              <span className="text-sm font-mono text-[#00E5FF]">LIVE DEMO</span>
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#FFFFFF]/5 border border-[#FFFFFF]/10 rounded-full mb-6">
+              <div className="w-2 h-2 rounded-full bg-[#FFFFFF] animate-pulse"></div>
+              <span className="demo-label text-[#A0A0A0]">LIVE DEMO</span>
             </div>
-            
+
             {/* Main Headline - B2B Focused */}
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+            <h2 className="demo-heading mb-4 font-display font-medium">
               Experience the Future of
-              <span className="block text-[#00E5FF] mt-2">Conversational Commerce</span>
+              <span className="block text-[#FFFFFF] mt-2">Conversational Commerce</span>
             </h2>
-            
+
             {/* Subheadline - Clear B2B Message */}
-            <p className="text-lg text-[#B0B0B0] max-w-3xl mx-auto mb-6">
+            <p className="section-description max-w-3xl mx-auto mb-6">
               This is the exact chatbot technology your customers will interact with.
               Try it yourself—drag products, ask questions, complete a full order.
             </p>
-            
+
             {/* Value Props - 3 key points */}
-            <div className="flex flex-wrap justify-center gap-6 text-sm text-[#B0B0B0]">
+            <div className="flex flex-wrap justify-center gap-6 text-sm text-[#B0B0B0] font-display">
               <div className="flex items-center gap-2">
-                <svg className="w-5 h-5 text-[#00E5FF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-[#FFFFFF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
                 <span>Embed on your site in 2 minutes</span>
               </div>
               <div className="flex items-center gap-2">
-                <svg className="w-5 h-5 text-[#00E5FF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-[#FFFFFF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
                 <span>Handles 1000+ products</span>
               </div>
               <div className="flex items-center gap-2">
-                <svg className="w-5 h-5 text-[#00E5FF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-[#FFFFFF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
                 <span>PCI-compliant payments</span>
               </div>
             </div>
           </div>
-          
+
           {/* Main Demo Layout - Technology First */}
           <div className="grid lg:grid-cols-[40%_60%] gap-8">
             {/* LEFT: Compact Product Catalog (40% - Supporting Role) */}
@@ -174,27 +177,27 @@ export default function Demo() {
               <div className="sticky top-24">
                 {/* Product Catalog Header */}
                 <div className="mb-6">
-                  <h3 className="text-lg font-semibold text-white mb-3">
+                  <h3 className="text-lg font-medium text-white mb-3 font-display">
                     Sample Product Catalog
                   </h3>
                   <p className="text-sm text-[#B0B0B0]">
                     These are sample products. Your catalog will display here.
                   </p>
                 </div>
-                
+
                 {/* Compact Product Grid */}
                 <div className="mb-4">
-                  <ProgressiveProductGrid 
+                  <ProgressiveProductGrid
                     onProductClick={handleProductClick}
                     onProductDrag={handleProductDrag}
                   />
                 </div>
-                
+
                 {/* Interaction Hint */}
                 <div className="p-3 bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg">
                   <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-[#00E5FF]/10 flex items-center justify-center flex-shrink-0">
-                      <svg className="w-5 h-5 text-[#00E5FF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0">
+                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
                       </svg>
                     </div>
@@ -208,7 +211,7 @@ export default function Demo() {
                 </div>
               </div>
             </div>
-            
+
             {/* RIGHT: Chatbot (60% - The Star) */}
             <div className="order-1 lg:order-2">
               <div className="sticky top-24">
@@ -216,73 +219,85 @@ export default function Demo() {
                 <div className="mb-4">
                   <div className="flex items-center gap-3 mb-3">
                     <div className="w-12 h-12 flex items-center justify-center">
-                      <img 
-                        src="/logo.svg" 
-                        alt="Checkoutly Logo" 
-                        width={28} 
+                      <img
+                        src="/logo.svg"
+                        alt="Checkoutly Logo"
+                        width={28}
                         height={28}
                         className="object-contain"
                       />
                     </div>
                     <div>
-                      <h3 className="text-xl font-bold text-white">Checkoutly AI Assistant</h3>
+                      <h3 className="text-xl font-medium text-white font-display">Checkoutly AI Assistant</h3>
                     </div>
                   </div>
                 </div>
-                
+
                 {/* The Actual Chatbot Interface */}
-                <ChatWidget 
+                <ChatWidget
                   selectedProduct={selectedProduct}
                   onProductSelect={setSelectedProduct}
-                  onExternalAddToCart={() => {}}
+                  onExternalAddToCart={() => { }}
                 />
               </div>
             </div>
           </div>
-          
+
           {/* Mobile Optimization */}
           <div className="lg:hidden mt-8">
             <div className="space-y-6">
               {/* Chat First (Most Important) */}
               <div>
-                <h3 className="text-lg font-bold text-white mb-2">Try the Chatbot</h3>
-                <p className="text-sm text-[#B0B0B0] mb-4">
+                <h3 className="text-lg font-medium text-white mb-2 font-display">Try the Chatbot</h3>
+                <p className="text-sm text-[var(--text-secondary)] mb-4">
                   This is what your customers will interact with
                 </p>
               </div>
             </div>
           </div>
         </div>
-        
+
         {/* Proof Section - B2B Metrics */}
         <div className="max-w-7xl mx-auto px-6 py-12 mt-16">
           <div className="grid md:grid-cols-3 gap-6">
             {/* Metric 1 */}
-            <div className="p-6 bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl">
-              <div className="text-4xl font-bold text-[#00E5FF] mb-2">73%</div>
-              <div className="text-sm font-semibold text-white mb-1">Higher Conversion</div>
-              <div className="text-xs text-[#6B6B6B]">
-                Customers who use chat complete purchases 73% more often
+            <ScrollReveal delay={200} threshold={0.1}>
+              <div className="p-6 bg-[var(--bg-tertiary)] border border-[var(--border-subtle)] rounded-xl h-full">
+                <div className="text-4xl font-bold text-[var(--accent)] mb-2 font-display">
+                  <AnimatedCounter value={73} suffix="%" />
+                </div>
+                <div className="text-sm font-medium text-white mb-1 font-display">Higher Conversion</div>
+                <div className="text-xs text-[var(--text-muted)]">
+                  Customers who use chat complete purchases 73% more often
+                </div>
               </div>
-            </div>
-            
+            </ScrollReveal>
+
             {/* Metric 2 */}
-            <div className="p-6 bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl">
-              <div className="text-4xl font-bold text-[#00E5FF] mb-2">-58%</div>
-              <div className="text-sm font-semibold text-white mb-1">Cart Abandonment</div>
-              <div className="text-xs text-[#6B6B6B]">
-                Conversational checkout reduces abandonment by over half
+            <ScrollReveal delay={400} threshold={0.1}>
+              <div className="p-6 bg-[var(--bg-tertiary)] border border-[var(--border-subtle)] rounded-xl h-full">
+                <div className="text-4xl font-bold text-[var(--accent)] mb-2 font-display">
+                  <AnimatedCounter value={-58} suffix="%" />
+                </div>
+                <div className="text-sm font-medium text-white mb-1 font-display">Cart Abandonment</div>
+                <div className="text-xs text-[var(--text-muted)]">
+                  Conversational checkout reduces abandonment by over half
+                </div>
               </div>
-            </div>
-            
+            </ScrollReveal>
+
             {/* Metric 3 */}
-            <div className="p-6 bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl">
-              <div className="text-4xl font-bold text-[#00E5FF] mb-2">24/7</div>
-              <div className="text-sm font-semibold text-white mb-1">Always Available</div>
-              <div className="text-xs text-[#6B6B6B]">
-                AI handles sales and support around the clock, no staffing needed
+            <ScrollReveal delay={600} threshold={0.1}>
+              <div className="p-6 bg-[var(--bg-tertiary)] border border-[var(--border-subtle)] rounded-xl h-full">
+                <div className="text-4xl font-bold text-[var(--accent)] mb-2 font-display">
+                  <AnimatedCounter value={24} suffix="/7" />
+                </div>
+                <div className="text-sm font-medium text-white mb-1 font-display">Always Available</div>
+                <div className="text-xs text-[var(--text-muted)]">
+                  AI handles sales and support around the clock, no staffing needed
+                </div>
               </div>
-            </div>
+            </ScrollReveal>
           </div>
         </div>
       </section>

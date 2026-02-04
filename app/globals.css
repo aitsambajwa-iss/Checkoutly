@@ -1,28 +1,96 @@
+@import url('https://cdn.jsdelivr.net/npm/geist@1.0.0/dist/font.css');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    /* Background Colors - Dark Minimalism */
-    --bg-primary: #0A0A0A;
-    --bg-secondary: #1A1A1A;
-    --bg-elevated: #2A2A2A;
-    
-    /* Text Colors */
+    /* Font Families */
+    --font-display: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-body: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'Geist Mono', 'Consolas', 'Monaco', monospace;
+
+    /* Font Sizes */
+    --text-xs: 0.75rem;
+    /* 12px */
+    --text-sm: 0.875rem;
+    /* 14px */
+    --text-base: 1rem;
+    /* 16px */
+    --text-lg: 1.125rem;
+    /* 18px */
+    --text-xl: 1.25rem;
+    /* 20px */
+    --text-2xl: 1.5rem;
+    /* 24px */
+    --text-3xl: 1.875rem;
+    /* 30px */
+    --text-4xl: 2.25rem;
+    /* 36px */
+    --text-5xl: 3rem;
+    /* 48px */
+    --text-6xl: 3.75rem;
+    /* 60px */
+
+    /* Font Weights */
+    --weight-normal: 400;
+    --weight-medium: 500;
+    --weight-semibold: 600;
+    --weight-bold: 700;
+
+    /* Line Heights */
+    --leading-tight: 1.2;
+    --leading-normal: 1.5;
+    --leading-relaxed: 1.6;
+
+    /* Letter Spacing */
+    --tracking-tight: -0.025em;
+    --tracking-normal: 0;
+    --tracking-wide: 0.025em;
+
+    /* Colors - True Minimal Luxury (Grayscale) */
+    --bg-primary: #000000;
+    /* Pure black */
+    --bg-secondary: #0A0A0A;
+    /* Near black */
+    --bg-tertiary: #0F0F0F;
+    /* Cards */
+    --bg-elevated: #1A1A1A;
+    /* Inputs/Hover */
+
+    --border-subtle: #2A2A2A;
+    --border-normal: #3A3A3A;
+    --border-strong: #4A4A4A;
+
     --text-primary: #FFFFFF;
-    --text-secondary: #B0B0B0;
+    --text-secondary: #A0A0A0;
+    /* Medium gray */
+    --text-tertiary: #6B6B6B;
+    /* Dark gray */
     --text-muted: #6B6B6B;
-    
-    /* Accent Color - Electric Cyan (use sparingly) */
-    --accent: #00F0FF;
-    --accent-glow: rgba(0, 240, 255, 0.3);
-    --accent-subtle: rgba(0, 240, 255, 0.1);
-    
+    --text-disabled: #4A4A4A;
+
+    --accent: #E5E5E5;
+    /* Off-white accent */
+    --accent-hover: #FFFFFF;
+    --accent-glow: rgba(255, 255, 255, 0.03);
+    --accent-subtle: rgba(255, 255, 255, 0.05);
+
+    --success: #E5E5E5;
+    /* Monochromatic success */
+    --success-bg: rgba(255, 255, 255, 0.05);
+    --error: #E5E5E5;
+    /* Indicate with icons/weight, not red */
+    --error-bg: rgba(255, 255, 255, 0.05);
+    --warning: #E5E5E5;
+    --warning-bg: rgba(255, 255, 255, 0.05);
+    --info: #E5E5E5;
+    --info-bg: rgba(255, 255, 255, 0.05);
+
     /* Spacing */
     --section-padding: 8rem;
     --content-max-width: 1400px;
-    
+
     /* Animation - Minimal & Professional */
     --ease-premium: cubic-bezier(0.4, 0.0, 0.2, 1);
   }
@@ -30,30 +98,43 @@
   body {
     background: var(--bg-primary);
     color: var(--text-primary);
-    font-family: var(--font-geist-sans);
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    line-height: var(--leading-normal);
   }
 
   /* Professional Typography */
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-weight: 600;
-    font-family: var(--font-geist-sans);
+    font-family: var(--font-display);
+    color: var(--text-primary);
   }
 
-  /* Mono font for prices only */
-  .price {
-    font-family: var(--font-geist-mono);
+  /* Mono font for prices and tech labels */
+  .price,
+  .mono {
+    font-family: var(--font-mono);
   }
 }
 
 /* Keyframe animations from the original HTML */
 @keyframes float {
-  0%, 100% { 
+
+  0%,
+  100% {
     transform: translateY(0px) translateX(0px) scale(1);
   }
-  33% { 
+
+  33% {
     transform: translateY(-30px) translateX(20px) scale(1.1);
   }
-  66% { 
+
+  66% {
     transform: translateY(20px) translateX(-15px) scale(0.9);
   }
 }
@@ -63,6 +144,7 @@
     opacity: 0;
     transform: translateY(40px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -70,17 +152,27 @@
 }
 
 @keyframes glowPulse {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 0 20px var(--accent-glow);
   }
+
   50% {
     box-shadow: 0 0 40px var(--accent-glow), 0 0 60px var(--accent-glow);
   }
 }
 
 @keyframes typing {
-  0%, 60% { opacity: 1; }
-  30% { opacity: 0.4; }
+
+  0%,
+  60% {
+    opacity: 1;
+  }
+
+  30% {
+    opacity: 0.4;
+  }
 }
 
 @keyframes slideInRight {
@@ -88,6 +180,7 @@
     opacity: 0;
     transform: translateX(30px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -99,6 +192,7 @@
     opacity: 0;
     transform: translateX(-30px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -110,6 +204,7 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -122,6 +217,7 @@
     transform: translateX(100%);
     opacity: 0;
   }
+
   to {
     transform: translateX(0);
     opacity: 1;
@@ -129,8 +225,13 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes scaleIn {
@@ -138,6 +239,7 @@
     transform: scale(0.9);
     opacity: 0;
   }
+
   to {
     transform: scale(1);
     opacity: 1;
@@ -149,6 +251,7 @@
     opacity: 1;
     transform: translateY(0);
   }
+
   to {
     opacity: 0;
     transform: translateY(-20px);
@@ -156,24 +259,44 @@
 }
 
 @keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 @keyframes wiggle {
-  0%, 100% { transform: rotate(0deg); }
-  25% { transform: rotate(-5deg); }
-  75% { transform: rotate(5deg); }
+
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+
+  25% {
+    transform: rotate(-5deg);
+  }
+
+  75% {
+    transform: rotate(5deg);
+  }
 }
 
 @keyframes pulseSubtle {
-  0%, 100% { 
-    transform: scale(1); 
-    box-shadow: 0 0 0 0 rgba(0, 240, 255, 0.4);
+
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.1);
   }
-  50% { 
-    transform: scale(1.05); 
-    box-shadow: 0 0 0 10px rgba(0, 240, 255, 0);
+
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
   }
 }
 
@@ -182,11 +305,11 @@
   .animate-float {
     animation: float 8s ease-in-out infinite;
   }
-  
+
   .animate-fade-up {
     animation: fadeUpStagger 0.8s var(--ease-premium) forwards;
   }
-  
+
   .animate-glow {
     animation: glowPulse 3s ease-in-out infinite;
   }
@@ -231,40 +354,72 @@
 
 /* MINIMAL ANIMATIONS - Only These Allowed */
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideInRight {
-  from { 
+  from {
     opacity: 0;
     transform: translateX(20px);
   }
-  to { 
+
+  to {
     opacity: 1;
     transform: translateX(0);
   }
 }
 
 @keyframes scaleHover {
-  from { transform: scale(1); }
-  to { transform: scale(1.02); }
+  from {
+    transform: scale(1);
+  }
+
+  to {
+    transform: scale(1.02);
+  }
 }
 
 @keyframes glowBorder {
-  from { border-color: var(--bg-elevated); }
-  to { border-color: var(--accent); }
+  from {
+    border-color: var(--bg-elevated);
+  }
+
+  to {
+    border-color: var(--accent);
+  }
 }
 
 @keyframes pulseOnce {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.1); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.1);
+  }
+
+  100% {
+    transform: scale(1);
+  }
 }
 
 @keyframes typing {
-  0%, 60%, 100% { opacity: 0.3; }
-  30% { opacity: 1; }
+
+  0%,
+  60%,
+  100% {
+    opacity: 0.3;
+  }
+
+  30% {
+    opacity: 1;
+  }
 }
 
 /* Professional Animation Classes */
@@ -333,9 +488,9 @@ textarea:focus-visible {
 
 /* Professional Button Styles */
 .btn-primary {
-  background: var(--accent);
+  background: #FFFFFF;
   color: #0A0A0A;
-  font-weight: 600;
+  font-weight: 700;
   transition: all 200ms var(--ease-premium);
 }
 
@@ -393,8 +548,13 @@ textarea:focus-visible {
 }
 
 @keyframes loading {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 /* Professional Modal Backdrop */
@@ -405,13 +565,17 @@ textarea:focus-visible {
 
 /* Remove old animations that don't fit the professional theme */
 @keyframes float {
-  0%, 100% { 
+
+  0%,
+  100% {
     transform: translateY(0px) translateX(0px) scale(1);
   }
-  33% { 
+
+  33% {
     transform: translateY(-30px) translateX(20px) scale(1.1);
   }
-  66% { 
+
+  66% {
     transform: translateY(20px) translateX(-15px) scale(0.9);
   }
 }
@@ -421,6 +585,7 @@ textarea:focus-visible {
     opacity: 0;
     transform: translateY(30px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -428,11 +593,14 @@ textarea:focus-visible {
 }
 
 @keyframes glowPulse {
-  0%, 100% {
-    box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
   }
+
   50% {
-    box-shadow: 0 0 40px rgba(0, 240, 255, 0.6);
+    box-shadow: 0 0 40px rgba(255, 255, 255, 0.1);
   }
 }
 
@@ -441,6 +609,7 @@ textarea:focus-visible {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -452,6 +621,7 @@ textarea:focus-visible {
     opacity: 0;
     transform: scale(0.9);
   }
+
   to {
     opacity: 1;
     transform: scale(1);
@@ -459,48 +629,69 @@ textarea:focus-visible {
 }
 
 @keyframes bounce {
-  0%, 20%, 53%, 80%, 100% {
+
+  0%,
+  20%,
+  53%,
+  80%,
+  100% {
     transform: translate3d(0, 0, 0);
   }
-  40%, 43% {
+
+  40%,
+  43% {
     transform: translate3d(0, -30px, 0);
   }
+
   70% {
     transform: translate3d(0, -15px, 0);
   }
+
   90% {
     transform: translate3d(0, -4px, 0);
   }
 }
 
 @keyframes wiggle {
-  0%, 7% {
+
+  0%,
+  7% {
     transform: rotateZ(0);
   }
+
   15% {
     transform: rotateZ(-15deg);
   }
+
   20% {
     transform: rotateZ(10deg);
   }
+
   25% {
     transform: rotateZ(-10deg);
   }
+
   30% {
     transform: rotateZ(6deg);
   }
+
   35% {
     transform: rotateZ(-4deg);
   }
-  40%, 100% {
+
+  40%,
+  100% {
     transform: rotateZ(0);
   }
 }
 
 @keyframes pulseSubtle {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.8;
   }
@@ -511,6 +702,7 @@ textarea:focus-visible {
     opacity: 0;
     transform: translateX(-20px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -553,6 +745,7 @@ textarea:focus-visible {
 .animate-slide-in-left {
   animation: slideInLeft 0.3s ease-out;
 }
+
 /* NEW REFINED ANIMATIONS FOR CHECKOUTLY */
 
 /* Slide In Animation for Messages */
@@ -561,6 +754,7 @@ textarea:focus-visible {
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -572,6 +766,7 @@ textarea:focus-visible {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -583,6 +778,7 @@ textarea:focus-visible {
     transform: scale(0);
     opacity: 1;
   }
+
   100% {
     transform: scale(2);
     opacity: 0;
@@ -595,6 +791,7 @@ textarea:focus-visible {
     opacity: 0;
     transform: translateX(100%);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -606,6 +803,7 @@ textarea:focus-visible {
     opacity: 1;
     transform: translateX(0);
   }
+
   to {
     opacity: 0;
     transform: translateX(100%);
@@ -686,6 +884,149 @@ textarea:focus-visible {
   animation: slideOutRight 300ms ease-in forwards;
 }
 
-.animate-fade-in {
-  animation: fadeInSmooth 0.8s ease-out forwards;
+
+@layer components {
+
+  /* Hero Section */
+  .hero-headline {
+    font-family: var(--font-display);
+    font-size: clamp(var(--text-4xl), 8vw, var(--text-6xl));
+    font-weight: var(--weight-bold);
+    line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-tight);
+    color: var(--text-primary);
+  }
+
+  .hero-subheadline {
+    font-family: var(--font-body);
+    font-size: var(--text-xl);
+    font-weight: var(--weight-normal);
+    line-height: var(--leading-relaxed);
+    color: var(--text-secondary);
+  }
+
+  .hero-cta {
+    font-family: var(--font-display);
+    font-size: var(--text-base);
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--tracking-normal);
+    background: #FFFFFF;
+    color: #000000;
+  }
+
+  /* Section Headings */
+  .section-heading {
+    font-family: var(--font-display);
+    font-size: clamp(var(--text-3xl), 6vw, var(--text-4xl));
+    font-weight: var(--weight-bold);
+    line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-tight);
+    color: #FFFFFF;
+  }
+
+  .section-description {
+    font-family: var(--font-body);
+    font-size: var(--text-lg);
+    font-weight: var(--weight-normal);
+    line-height: var(--leading-relaxed);
+    color: var(--text-secondary);
+  }
+
+  /* Features Section */
+  .feature-title {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    font-weight: var(--weight-semibold);
+    color: #FFFFFF;
+  }
+
+  .feature-description {
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    font-weight: var(--weight-normal);
+    line-height: var(--leading-normal);
+    color: var(--text-secondary);
+  }
+
+  /* Demo Section */
+  .demo-heading {
+    font-family: var(--font-display);
+    font-size: var(--text-3xl);
+    font-weight: var(--weight-bold);
+    color: #FFFFFF;
+  }
+
+  .demo-label {
+    font-family: var(--font-display);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide);
+    color: var(--text-secondary);
+  }
+
+  /* Chat Interface */
+  .chat-message {
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    font-weight: var(--weight-normal);
+    line-height: var(--leading-normal);
+  }
+
+  .chat-timestamp {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+  }
+
+  /* Prices & Numbers */
+  .price {
+    font-family: var(--font-mono);
+    font-size: var(--text-2xl);
+    font-weight: var(--weight-bold);
+    color: #FFFFFF;
+  }
+
+  .product-price {
+    font-family: var(--font-mono);
+    font-weight: var(--weight-semibold);
+    color: #FFFFFF;
+  }
+
+  /* Code Snippets */
+  .code-snippet {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-subtle);
+  }
+
+  /* Buttons */
+  .button-primary {
+    font-family: var(--font-display);
+    font-size: var(--text-base);
+    font-weight: var(--weight-bold);
+    letter-spacing: var(--tracking-normal);
+    background: #FFFFFF;
+    color: #000000;
+  }
+
+  .button-primary:hover {
+    background: #E5E5E5;
+  }
+
+  .button-secondary {
+    font-family: var(--font-display);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    background: transparent;
+    color: #E5E5E5;
+    border: 1px solid var(--border-normal);
+  }
+
+  .button-secondary:hover {
+    background: var(--bg-elevated);
+    border-color: #E5E5E5;
+  }
 }

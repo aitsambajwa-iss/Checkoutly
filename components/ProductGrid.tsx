@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { getAllProducts, Product } from '@/lib/products'
 import ProductImage from './ProductImage'
+import Price from './Price'
 
 interface ProductGridProps {
   onProductClick: (product: Product) => void
@@ -33,8 +34,8 @@ export default function ProductGrid({ onProductClick }: ProductGridProps) {
   const getIcon = () => {
     return (
       <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <path d="M2 18h20l-2-6H4l-2 6zM6 12V9a3 3 0 016 0v3"/>
-        <path d="M8 12h8"/>
+        <path d="M2 18h20l-2-6H4l-2 6zM6 12V9a3 3 0 016 0v3" />
+        <path d="M8 12h8" />
       </svg>
     )
   }
@@ -64,7 +65,7 @@ export default function ProductGrid({ onProductClick }: ProductGridProps) {
         <h3 className="text-2xl font-bold">Featured Products</h3>
         <div className="text-center py-8">
           <p className="text-red-400 mb-4">{error}</p>
-          <button 
+          <button
             onClick={() => window.location.reload()}
             className="bg-[var(--accent)] text-[#0A0A0A] px-4 py-2 rounded-lg hover:scale-105 transition-transform"
           >
@@ -93,9 +94,9 @@ export default function ProductGrid({ onProductClick }: ProductGridProps) {
         {products.map((product) => (
           <div
             key={product.id}
-            className="bg-[var(--bg-secondary)] border border-[var(--bg-elevated)] rounded-xl p-4 transition-all duration-300 hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-[0_10px_20px_rgba(0,240,255,0.1)] group"
+            className="bg-[var(--bg-secondary)] border border-[var(--bg-elevated)] rounded-xl p-4 transition-all duration-300 hover:-translate-y-1 hover:border-[var(--accent)] hover:shadow-[0_10px_20px_rgba(255,255,255,0.03)] group"
           >
-            <div 
+            <div
               onClick={() => onProductClick(product)}
               className="cursor-pointer"
               draggable
@@ -105,11 +106,11 @@ export default function ProductGrid({ onProductClick }: ProductGridProps) {
               }}
             >
               <div className="aspect-square bg-[var(--bg-elevated)] rounded-lg mb-4 overflow-hidden group-hover:scale-105 transition-transform">
-                <ProductImage 
+                <ProductImage
                   productName={product.name}
                   className="w-full h-full object-cover rounded-lg"
                   fallbackIcon={
-                    <div className="text-[var(--accent)]">
+                    <div className="text-[var(--text-muted)] opacity-50">
                       {getIcon()}
                     </div>
                   }
@@ -117,7 +118,7 @@ export default function ProductGrid({ onProductClick }: ProductGridProps) {
               </div>
               <h4 className="font-semibold mb-2 text-sm">{product.name}</h4>
               <p className="text-[var(--text-muted)] text-xs mb-2 line-clamp-2">{product.description}</p>
-              <p className="text-[var(--accent)] font-bold mb-3">${product.price}</p>
+              <Price amount={product.price} size="md" className="mb-3" />
             </div>
           </div>
         ))}

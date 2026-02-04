@@ -45,7 +45,7 @@ export default function ReviewForm({ onSubmit, onCancel }: ReviewFormProps) {
 
   const handleInputChange = (field: keyof ReviewData, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }))
-    
+
     // Clear error when user starts typing
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }))
@@ -58,7 +58,7 @@ export default function ReviewForm({ onSubmit, onCancel }: ReviewFormProps) {
 
     stepFields.forEach(field => {
       const value = formData[field as keyof ReviewData]
-      
+
       if (field === 'order_id') {
         if (!value || (typeof value === 'string' && !value.trim())) {
           newErrors[field] = 'Order ID is required'
@@ -132,11 +132,10 @@ export default function ReviewForm({ onSubmit, onCancel }: ReviewFormProps) {
               key={star}
               type="button"
               onClick={() => handleInputChange('rating', star)}
-              className={`text-xl transition-colors ${
-                star <= formData.rating 
-                  ? 'text-yellow-400 hover:text-yellow-300' 
-                  : 'text-gray-600 hover:text-gray-500'
-              }`}
+              className={`text-xl transition-colors ${star <= formData.rating
+                ? 'text-yellow-400 hover:text-yellow-300'
+                : 'text-gray-600 hover:text-gray-500'
+                }`}
             >
               ★
             </button>
@@ -169,7 +168,7 @@ export default function ReviewForm({ onSubmit, onCancel }: ReviewFormProps) {
             <p className="text-xs text-[var(--text-muted)] mt-1">
               Enter the order ID from your order confirmation
             </p>
-            {error && <p className="text-red-400 text-xs mt-1">{error}</p>}
+            {error && <p className="text-[var(--error)] text-xs mt-1">{error}</p>}
           </div>
         )
 
@@ -187,7 +186,7 @@ export default function ReviewForm({ onSubmit, onCancel }: ReviewFormProps) {
             <p className="text-xs text-[var(--text-muted)] mt-1">
               We&apos;ll use this to verify your purchase
             </p>
-            {error && <p className="text-red-400 text-xs mt-1">{error}</p>}
+            {error && <p className="text-[var(--error)] text-xs mt-1">{error}</p>}
           </div>
         )
 
@@ -214,7 +213,7 @@ export default function ReviewForm({ onSubmit, onCancel }: ReviewFormProps) {
                 {(value as string).length}/500
               </p>
             </div>
-            {error && <p className="text-red-400 text-xs mt-1">{error}</p>}
+            {error && <p className="text-[var(--error)] text-xs mt-1">{error}</p>}
           </div>
         )
 
@@ -232,7 +231,7 @@ export default function ReviewForm({ onSubmit, onCancel }: ReviewFormProps) {
             <p className="text-xs text-[var(--text-muted)] mt-1">
               This will be shown with your review
             </p>
-            {error && <p className="text-red-400 text-xs mt-1">{error}</p>}
+            {error && <p className="text-[var(--error)] text-xs mt-1">{error}</p>}
           </div>
         )
 
@@ -244,10 +243,10 @@ export default function ReviewForm({ onSubmit, onCancel }: ReviewFormProps) {
   const currentStepData = steps[currentStep]
 
   return (
-    <div className="bg-[var(--bg-elevated)] rounded-xl p-3 my-2 border border-[var(--accent)]/20 flex flex-col">
+    <div className="bg-[var(--bg-tertiary)] rounded-xl p-3 my-2 border border-[var(--accent)]/20 flex flex-col shadow-xl">
       {/* Review Header - Compact */}
-      <div className="mb-3 pb-2 border-b border-[var(--bg-elevated)]">
-        <h3 className="text-base font-semibold text-white mb-1">⭐ Leave a Review</h3>
+      <div className="mb-3 pb-2 border-b border-[var(--border-subtle)]">
+        <h3 className="text-base font-display font-medium text-[var(--text-primary)] mb-1">⭐ Leave a Review</h3>
         <p className="text-xs text-[var(--text-muted)]">
           Share your experience to help other customers
         </p>
@@ -257,17 +256,15 @@ export default function ReviewForm({ onSubmit, onCancel }: ReviewFormProps) {
       <div className="flex items-center justify-between mb-3">
         {steps.map((_, index) => (
           <div key={index} className="flex items-center">
-            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
-              index <= currentStep 
-                ? 'bg-[var(--accent)] text-[#0A0A0A]' 
-                : 'bg-[var(--bg-elevated)] text-[var(--text-muted)]'
-            }`}>
+            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium transition-all duration-300 ${index <= currentStep
+              ? 'bg-[var(--accent)] text-black shadow-[0_0_8px_var(--accent-glow)]'
+              : 'bg-[var(--bg-elevated)] text-[var(--text-muted)] border border-[var(--border-subtle)]'
+              }`}>
               {index + 1}
             </div>
             {index < steps.length - 1 && (
-              <div className={`w-8 h-0.5 mx-1 ${
-                index < currentStep ? 'bg-[var(--accent)]' : 'bg-[var(--bg-elevated)]'
-              }`} />
+              <div className={`w-8 h-0.5 mx-1 transition-colors duration-300 ${index < currentStep ? 'bg-[var(--accent)]' : 'bg-[var(--border-subtle)]'
+                }`} />
             )}
           </div>
         ))}
@@ -275,17 +272,17 @@ export default function ReviewForm({ onSubmit, onCancel }: ReviewFormProps) {
 
       {/* Current Step */}
       <div className="flex-1 mb-3">
-        <h4 className="text-sm font-medium text-white mb-2">{currentStepData.title}</h4>
+        <h4 className="text-sm font-display font-medium text-[var(--text-primary)] mb-3">{currentStepData.title}</h4>
         {currentStepData.fields.map(field => renderField(field))}
       </div>
 
       {/* Buttons - Always visible at bottom */}
-      <div className="flex gap-2 pt-2 border-t border-[var(--bg-elevated)]">
+      <div className="flex gap-2 pt-3 border-t border-[var(--border-subtle)]">
         {currentStep > 0 && (
           <button
             onClick={handleBack}
             disabled={isSubmitting}
-            className="flex-1 bg-[var(--bg-elevated)] text-white border border-[var(--bg-elevated)] rounded-lg py-2 px-3 hover:bg-[var(--bg-elevated)]/80 transition-colors disabled:opacity-50 text-sm"
+            className="flex-1 bg-transparent text-[var(--text-secondary)] border border-[var(--border-subtle)] rounded-lg py-2 px-3 hover:bg-[var(--bg-elevated)] hover:text-white transition-all disabled:opacity-50 text-sm font-medium"
           >
             Back
           </button>
@@ -293,14 +290,14 @@ export default function ReviewForm({ onSubmit, onCancel }: ReviewFormProps) {
         <button
           onClick={handleNext}
           disabled={isSubmitting}
-          className="flex-1 bg-[var(--accent)] text-[#0A0A0A] rounded-lg py-2 px-3 hover:scale-105 transition-transform font-medium disabled:opacity-50 disabled:hover:scale-100 text-sm"
+          className="flex-[2] bg-[var(--accent)] text-black rounded-lg py-2.5 px-3 hover:-translate-y-0.5 hover:shadow-[0_10px_30px_var(--accent-glow)] transition-all font-bold disabled:opacity-50 text-sm"
         >
-          {isSubmitting ? 'Submitting...' : currentStep === steps.length - 1 ? 'Submit Review' : 'Next'}
+          {isSubmitting ? 'Submitting...' : currentStep === steps.length - 1 ? 'Submit Review' : 'Next Step'}
         </button>
         <button
           onClick={onCancel}
           disabled={isSubmitting}
-          className="px-3 py-2 text-[var(--text-muted)] hover:text-white transition-colors disabled:opacity-50 text-sm"
+          className="px-3 py-2 text-[var(--text-muted)] hover:text-white transition-colors disabled:opacity-50 text-sm font-medium"
         >
           Cancel
         </button>

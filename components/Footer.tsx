@@ -5,18 +5,18 @@ export default function Footer() {
     <footer className="py-12 border-t border-[var(--bg-elevated)] mt-16">
       <div className="max-w-[1400px] mx-auto px-8">
         <div className="flex flex-col md:flex-row justify-between items-center gap-8">
-          <Link href="/" className="flex items-center gap-3 font-bold text-xl">
-            <img 
-              src="/logo.svg" 
-              alt="Checkoutly Logo" 
-              width={40} 
+          <Link href="/" className="flex items-center gap-3 font-display font-bold text-xl">
+            <img
+              src="/logo.svg"
+              alt="Checkoutly Logo"
+              width={40}
               height={40}
               className="object-contain"
             />
             Checkoutly
           </Link>
-          
-          <div className="flex items-center gap-8 text-sm text-[var(--text-secondary)]">
+
+          <div className="flex items-center gap-8 text-sm text-[var(--text-secondary)] font-display">
             <Link href="#" className="hover:text-white transition-colors">
               Privacy Policy
             </Link>
@@ -27,7 +27,7 @@ export default function Footer() {
               Contact
             </Link>
           </div>
-          
+
           <p className="text-sm text-[var(--text-muted)]">
             © 2026 Checkoutly. All rights reserved.
           </p>

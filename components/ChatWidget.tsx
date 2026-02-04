@@ -9,6 +9,10 @@ import PaymentForm from './PaymentForm'
 import ReviewForm from './ReviewForm'
 import InlineProductCard from './InlineProductCard'
 import StickyProductBar from './StickyProductBar'
+import InteractiveLoading, { LoadingState } from './InteractiveLoading'
+import ProductSkeleton from './ProductSkeleton'
+import TypewriterText from './TypewriterText'
+import { motion, AnimatePresence } from 'framer-motion'
 import type { Message, Product } from '@/lib/types'
 
 interface ChatWidgetProps {
@@ -94,7 +98,7 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
   useEffect(() => {
     setMessages([{
       id: '1',
-      content: '👋 Hi! I\'m your AI shopping assistant. Drag products into this chat or ask me about our products!',
+      content: "Hi! I'm your AI shopping assistant. Drag products into this chat or ask me about our products!",
       isUser: false,
       timestamp: createTimestamp()
     }])
@@ -104,6 +108,7 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
   const [showPaymentForm, setShowPaymentForm] = useState(false)
   const [showReviewForm, setShowReviewForm] = useState(false)
   const [completedOrder, setCompletedOrder] = useState<any>(null)
+  const [loadingState, setLoadingState] = useState<LoadingState>('general')
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   // Calculate cart totals (memoized for performance)
@@ -145,11 +150,11 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
 
       setCartItems(prev => [...prev, newItem])
       showSuccessToast(`Added ${productName} to cart!`)
-      addMessage(`✅ Added ${productName} (${options.size}, ${options.color}) to your cart! Say "checkout" when ready to order.`, false)
+      addMessage(`Added ${productName} (${options.size}, ${options.color}) to your cart. Say "checkout" when ready to order.`, false)
 
     } catch (error) {
       console.error('Error adding to cart:', error)
-      addMessage(`❌ Sorry, there was an error adding ${productName} to your cart.`, false)
+      addMessage(`Sorry, there was an error adding ${productName} to your cart.`, false)
     }
   }, [setCartItems])
 
@@ -226,7 +231,7 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
       `• ${item.name}${item.size || item.color ? ` (${[item.size, item.color].filter(Boolean).join(', ')})` : ''} - $${item.price} × ${item.quantity} = $${(item.price * item.quantity).toFixed(2)}`
     ).join('\n')
 
-    addMessage(`🛒 Your Cart:\n${cartSummary}\n\nTotal: $${cartTotal.toFixed(2)}\n\nSay "checkout" to place your order!`, false)
+    addMessage(`Your Cart:\n${cartSummary}\n\nTotal: $${cartTotal.toFixed(2)}\n\nSay "checkout" to place your order!`, false)
   }
 
   // Handle product details view
@@ -278,7 +283,7 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
         // Show success ripple animation
         const chatContainer = e.currentTarget as HTMLElement
         const ripple = document.createElement('div')
-        ripple.className = 'absolute top-1/2 left-1/2 w-24 h-24 -mt-12 -ml-12 border-4 border-[#00E5FF] rounded-full animate-ping pointer-events-none'
+        ripple.className = 'absolute top-1/2 left-1/2 w-24 h-24 -mt-12 -ml-12 border-4 border-[#FFFFFF] rounded-full animate-ping pointer-events-none'
         chatContainer.appendChild(ripple)
 
         setTimeout(() => ripple.remove(), 600)
@@ -417,6 +422,19 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
       }
     }
 
+    // Set loading state based on message content
+    if (message.toLowerCase().includes('search') || message.toLowerCase().includes('show') || message.toLowerCase().includes('find')) {
+      setLoadingState('search')
+    } else if (message.toLowerCase().includes('cart')) {
+      setLoadingState('cart')
+    } else if (message.toLowerCase().includes('checkout') || message.toLowerCase().includes('buy')) {
+      setLoadingState('order')
+    } else if (message.toLowerCase().includes('detail') || message.toLowerCase().includes('tell me about')) {
+      setLoadingState('view')
+    } else {
+      setLoadingState('general')
+    }
+
     showTypingIndicator()
     try {
       const response = await sendToCloudflareWorker(message)
@@ -426,7 +444,7 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
         const actionData = JSON.parse(response)
         if (actionData.action === 'add_to_cart') {
           addToCart(actionData.product_name, actionData.quantity || 1, actionData.size, actionData.color)
-          addMessage(actionData.message || `✅ Added ${actionData.product_name} to your cart! Say "cart" to view or "checkout" to order.`)
+          addMessage(actionData.message || `Added ${actionData.product_name} to your cart. Say "cart" to view or "checkout" to order.`)
           return
         } else if (actionData.action === 'view_cart') {
           showCart()
@@ -440,7 +458,7 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
 
     } catch (error) {
       console.error('Chat error:', error)
-      addMessage('❌ Sorry, I encountered an error. Please try again.')
+      addMessage('Sorry, I encountered an error. Please try again.')
     } finally {
       hideTypingIndicator()
     }
@@ -585,7 +603,7 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
 
     } catch (error) {
       console.error('Order error:', error)
-      addMessage('❌ Sorry, there was an error placing your order. Please try again or contact support.')
+      addMessage('Sorry, there was an error placing your order. Please try again or contact support.')
     } finally {
       hideTypingIndicator()
     }
@@ -620,7 +638,7 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
 
     } catch (error) {
       console.error('Payment error:', error)
-      addMessage('❌ Sorry, there was an error processing your payment. Please try again or contact support.')
+      addMessage('Sorry, there was an error processing your payment. Please try again or contact support.')
     } finally {
       hideTypingIndicator()
     }
@@ -654,7 +672,7 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
 
     } catch (error) {
       console.error('Review error:', error)
-      addMessage('❌ Sorry, there was an error submitting your review. Please try again or contact support.')
+      addMessage('Sorry, there was an error submitting your review. Please try again or contact support.')
     } finally {
       hideTypingIndicator()
     }
@@ -721,7 +739,7 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
             />
           </div>
           <div>
-            <div className="font-semibold text-white text-sm">AI Assistant</div>
+            <div className="font-display font-medium text-white text-sm">AI Assistant</div>
             <div className="text-xs text-[#10B981]">Online & Ready</div>
           </div>
         </div>
@@ -781,15 +799,17 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
             {/* Content */}
             <div className="text-center relative z-10">
               {/* Icon with subtle glow */}
-              <div className="relative mb-4">
-                <div className="text-6xl animate-bounce filter drop-shadow-[0_0_15px_rgba(0,229,255,0.3)]">
-                  📦
-                </div>
+              <div className="relative mb-4 flex justify-center">
+                <svg className="w-16 h-16 text-white/40 animate-bounce" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
+                  <path d="m3.3 7 8.7 5 8.7-5" />
+                  <path d="M12 22V12" />
+                </svg>
               </div>
 
               {/* Stable text with subtle glow */}
               <div className="relative">
-                <div className="text-2xl font-bold text-[#00E5FF] mb-2 filter drop-shadow-[0_0_8px_rgba(0,229,255,0.4)]">
+                <div className="text-2xl font-bold text-[#FFFFFF] mb-2 filter drop-shadow-[0_0_8px_rgba(255,255,255,0.1)]">
                   Drop to inquire
                 </div>
                 <div className="text-sm text-[#B0B0B0]">
@@ -800,7 +820,7 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
 
             {/* Subtle ripple effect */}
             <div className="absolute inset-0 rounded-2xl">
-              <div className="absolute inset-0 bg-[#00E5FF]/2 rounded-2xl animate-ping opacity-30"></div>
+              <div className="absolute inset-0 bg-[#FFFFFF]/5 rounded-2xl animate-ping opacity-30"></div>
             </div>
           </div>
         )}
@@ -839,11 +859,14 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
         )}
 
         {isTyping && (
-          <div className="flex items-center gap-2 text-[#B0B0B0] animate-pulse">
-            <div className="w-2 h-2 bg-[#00E5FF] rounded-full animate-bounce"></div>
-            <div className="w-2 h-2 bg-[#00E5FF] rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-            <div className="w-2 h-2 bg-[#00E5FF] rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
-            <span className="text-sm ml-2">AI is thinking...</span>
+          <div className="mb-6">
+            <InteractiveLoading state={loadingState} />
+            {loadingState === 'search' && (
+              <div className="flex gap-3 mt-4 overflow-x-auto pb-2 scrollbar-hide">
+                <ProductSkeleton />
+                <ProductSkeleton />
+              </div>
+            )}
           </div>
         )}
 
@@ -860,13 +883,13 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSend()}
             placeholder="Ask about products, place orders, track shipments..."
-            className="flex-1 px-4 py-3 bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg text-white placeholder-[#6B6B6B] focus:outline-none focus:border-[#00E5FF] transition-all duration-300"
+            className="flex-1 px-4 py-3 bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg text-white placeholder-[#6B6B6B] focus:outline-none focus:border-[#FFFFFF] transition-all duration-300"
             disabled={showPaymentForm || showReviewForm || showOrderForm}
           />
           <button
             onClick={handleSend}
             disabled={isTyping || showPaymentForm || showReviewForm || showOrderForm}
-            className="px-6 py-3 bg-[#00E5FF] text-black font-semibold rounded-lg hover:bg-[#00B8D4] transition-all duration-300 disabled:opacity-50"
+            className="px-6 py-3 bg-[#FFFFFF] text-black font-bold rounded-lg hover:bg-[#E5E5E5] transition-all duration-300 disabled:opacity-50"
           >
             Send
           </button>
@@ -876,13 +899,23 @@ export default function ChatWidget({ selectedProduct, onProductSelect, onExterna
         <div className="flex gap-2 mt-3 overflow-x-auto pb-1">
           <button
             onClick={showCart}
-            className="flex-shrink-0 text-xs px-3 py-1.5 bg-[#1A1A1A] text-[#B0B0B0] rounded border border-[#2A2A2A] hover:border-[#00E5FF] hover:text-white transition-all duration-300"
+            className="flex-shrink-0 text-xs px-3 py-1.5 bg-[#1A1A1A] text-[#B0B0B0] rounded border border-[#2A2A2A] hover:border-[#FFFFFF] hover:text-white transition-all duration-300"
           >
             Cart
           </button>
+
+          {cartItems.length > 0 && (
+            <button
+              onClick={() => handleUserMessage('checkout')}
+              className="flex-shrink-0 text-xs px-4 py-1.5 bg-[var(--accent)] text-black font-bold rounded shadow-[0_4px_12px_var(--accent-glow)] hover:bg-[var(--accent-hover)] transition-all duration-300 animate-pulse-subtle"
+            >
+              Checkout
+            </button>
+          )}
+
           <button
             onClick={() => setShowReviewForm(true)}
-            className="flex-shrink-0 text-xs px-3 py-1.5 bg-[#1A1A1A] text-[#B0B0B0] rounded border border-[#2A2A2A] hover:border-[#00E5FF] hover:text-white transition-all duration-300"
+            className="flex-shrink-0 text-xs px-3 py-1.5 bg-[#1A1A1A] text-[#B0B0B0] rounded border border-[#2A2A2A] hover:border-[#FFFFFF] hover:text-white transition-all duration-300"
           >
             Leave Review
           </button>
@@ -898,8 +931,8 @@ const RichMessageContent = ({ content, addToCart, handleProductDetails }: {
   addToCart: (productName: string, quantity?: number) => Promise<void>,
   handleProductDetails: (product: Product) => void
 }) => {
-  // Regex to match [PRODUCT:JSON_DATA] or **bold text**
-  const combinedRegex = /\[PRODUCT:(\{.*?\})\]|\*\*(.*?)\*\*/g;
+  // Regex to match [PRODUCT:JSON_DATA] or **bold text**, supporting newlines and optional whitespace
+  const combinedRegex = /\[PRODUCT:\s*(\{[\s\S]*?\})\]|\*\*([\s\S]*?)\*\*/g;
   const parts = [];
   let lastIndex = 0;
   let match;
@@ -916,6 +949,7 @@ const RichMessageContent = ({ content, addToCart, handleProductDetails }: {
         const productData = JSON.parse(match[1]);
         parts.push({ type: 'product', value: productData });
       } catch (e) {
+        console.warn('Failed to parse product JSON:', e);
         parts.push({ type: 'text', value: match[0] });
       }
     } else if (match[2]) {
@@ -931,25 +965,78 @@ const RichMessageContent = ({ content, addToCart, handleProductDetails }: {
     parts.push({ type: 'text', value: content.slice(lastIndex) });
   }
 
-  if (parts.length === 0) return <>{content}</>;
+  if (parts.length === 0) return (
+    <div className="whitespace-pre-wrap leading-relaxed">
+      <TypewriterText text={content} />
+    </div>
+  );
+
+  // Grouping logic for inline elements (text, bold) vs block elements (product)
+  const groupedParts: any[] = [];
+  let currentGroup: any[] = [];
+
+  parts.forEach((part) => {
+    if (part.type === 'product') {
+      if (currentGroup.length > 0) {
+        groupedParts.push({ type: 'inline-group', value: currentGroup });
+        currentGroup = [];
+      }
+      groupedParts.push(part);
+    } else {
+      currentGroup.push(part);
+    }
+  });
+
+  if (currentGroup.length > 0) {
+    groupedParts.push({ type: 'inline-group', value: currentGroup });
+  }
 
   return (
-    <div className="space-y-3">
-      {parts.map((part, i) => {
-        if (part.type === 'bold') {
-          return <strong key={i} className="font-bold text-[#00E5FF]">{part.value}</strong>;
-        } else if (part.type === 'product') {
+    <div className="space-y-4">
+      {groupedParts.map((group, i) => {
+        if (group.type === 'product') {
           return (
-            <div key={i} className="my-2">
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ delay: 0.1, type: 'spring', damping: 20 }}
+              className="my-4 transform transition-all duration-300 hover:scale-[1.01]"
+            >
               <InlineProductCard
-                product={part.value}
+                product={group.value}
                 onAddToCart={addToCart}
                 onViewDetails={handleProductDetails}
               />
-            </div>
+            </motion.div>
           );
         }
-        return <span key={i} className="whitespace-pre-wrap">{part.value}</span>;
+
+        // It's an inline group (paragraph)
+        return (
+          <div key={i} className="chat-message whitespace-pre-wrap leading-relaxed text-white">
+            {group.value.map((part: any, j: number) => {
+              if (part.type === 'bold') {
+                return (
+                  <motion.span
+                    key={j}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.05 * j }}
+                    className="inline"
+                  >
+                    <strong className="font-medium text-white underline underline-offset-4 decoration-[var(--accent)]/30">
+                      {part.value}
+                    </strong>
+                  </motion.span>
+                );
+              }
+              return (
+                <TypewriterText key={j} text={part.value} />
+              );
+            })}
+          </div>
+        );
       })}
     </div>
   );
@@ -989,13 +1076,13 @@ const MessageItem = memo(function MessageItem({ message, addToCart, handleProduc
           />
         ) : (
           <div
-            className={`px-4 py-3 rounded-2xl ${message.isUser
-              ? 'bg-[#00E5FF] text-black shadow-[0_0_20px_rgba(0,229,255,0.2)]'
-              : 'bg-[#1A1A1A] text-white border border-[#2A2A2A]'
+            className={`chat-message px-5 py-3 rounded-2xl transition-all duration-300 ${message.isUser
+              ? 'bg-[#FFFFFF] text-black shadow-[0_8px_24px_rgba(255,255,255,0.08)]'
+              : 'bg-[#1E1E1E] text-white border border-[#2A2A2A] shadow-[0_8px_32px_rgba(0,0,0,0.4)]'
               }`}
           >
             {message.isUser ? (
-              message.content
+              <span className="text-black font-medium">{message.content}</span>
             ) : (
               <RichMessageContent
                 content={message.content}
